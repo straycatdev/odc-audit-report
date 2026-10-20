@@ -59,6 +59,24 @@
     #remarks { width: 100%; height: 94px; resize: none; border: 1px solid var(--line); border-radius: 4px; padding: 9px 11px; line-height: 1.45; color: #213346; font-size: 12px; }
     footer { display: flex; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 9px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; }
     .print-value { display: none; }
+    /* Equal artefact frames on every page; compact cover details preserve image space. */
+    .page { --artefact-height: 326px; }
+    #firstPage { gap: 6px; }
+    #firstPage .report-header { padding-bottom: 6px; border-bottom-width: 2px; }
+    #firstPage .eyebrow { margin-bottom: 2px; font-size: 9px; }
+    #firstPage h1 { font-size: 22px; }
+    #firstPage .subtitle { margin-top: 2px; font-size: 10px; }
+    #firstPage .classification { font-size: 9px; }
+    #firstPage .field { padding: 5px 10px; }
+    #firstPage .field-label { margin-bottom: 2px; font-size: 9px; }
+    #firstPage .field input, #firstPage .field select { height: 27px; padding: 3px 6px; font-size: 12px; }
+    #firstPage .date-row button { min-height: 27px; padding: 3px 7px; }
+    #firstPage .section-heading { padding-bottom: 3px; }
+    .primary-artefacts, .artefact-grid { flex: none; display: grid; grid-template-columns: 1fr; grid-template-rows: repeat(2, var(--artefact-height)); gap: 10px; }
+    .primary-artefacts .artefact, .artefact-grid .artefact { height: var(--artefact-height); }
+    #firstPage .remarks-section { display: grid; grid-template-columns: 94px minmax(0, 1fr); gap: 10px; align-items: start; }
+    #firstPage .remarks-section > .section-title { padding-top: 7px; font-size: 10px; }
+    #remarks { height: 44px; padding: 5px 8px; }
     /* Application shell: separate from the fixed-size printable document. */
     .icon { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
     .icon-definitions { position: absolute; width: 0; height: 0; overflow: hidden; }
@@ -75,6 +93,12 @@
     .nav-link { display: flex; align-items: center; gap: 11px; padding: 11px 12px; margin: 3px 0; border-radius: 7px; color: #c3cfe0; text-decoration: none; font-size: 13px; }
     .nav-link:hover { background: #ffffff0d; color: #fff; }
     .nav-link.current { background: #294574; color: #fff; box-shadow: inset 3px 0 #80a4ff; }
+    .upcoming-link { display: block; margin: 10px 12px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #c3cfe0; font-size: 12px; font-weight: 400; text-align: left; }
+    .upcoming-link:hover { background: transparent; color: #fff; }
+    .upcoming-link span { margin-left: 8px; color: #9cacc4; font-size: 10px; }
+    .upcoming-note { margin: 8px 12px; color: #b8c7db; font-size: 11px; }
+    .menu-button, .nav-backdrop { display: none; }
+    .header-location { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .sidebar-foot { margin-top: auto; padding: 18px 10px 0; border-top: 1px solid #ffffff1a; color: #a7b6cc; font-size: 11px; }
     .sidebar-foot strong { display: block; color: #e1e8f4; margin-bottom: 3px; font-size: 12px; }
     .app-main { min-width: 0; background: var(--canvas); }
@@ -137,6 +161,9 @@
     @media screen and (max-width: 1180px) {
       .app-shell { grid-template-columns: 1fr; }
       .sidebar { display: none; }
+      .menu-button { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 10px; flex: none; }
+      .nav-open .sidebar { display: flex; position: fixed; left: 0; top: 0; width: 250px; height: 100vh; height: 100dvh; z-index: 30; overflow-y: auto; }
+      .nav-open .nav-backdrop { display: block; position: fixed; inset: 0; z-index: 29; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 0; background: #101f3570; }
     }
     @media screen and (max-width: 650px) {
       .app-header { min-height: 58px; padding: 14px 18px; }
@@ -160,6 +187,50 @@
       #pageControls { width: 100%; }
       .preview-heading span { display: none; }
       .workspace { padding: 0 16px 24px; }
+      .title-row { flex-wrap: wrap; }
+      .toolbar-main > .actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .toolbar-main > .actions .subtle { grid-column: 1 / -1; justify-self: start; }
+      .controls button, .title-row button { min-height: 44px; }
+      .check { min-height: 44px; }
+      #pageControls { gap: 8px; }
+      #pageControls button { flex: 1; padding-left: 8px; padding-right: 8px; }
+      .overview { grid-template-columns: 1fr 1fr; }
+      .stat-card:last-child { grid-column: 1 / -1; }
+      .stat-card:last-child > div { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    }
+    @media screen and (max-width: 900px) {
+      .page { width: 100%; max-width: 816px; height: auto; padding: clamp(16px, 4vw, 38px); gap: 14px; border-radius: 8px; }
+      #firstPage { gap: 12px; }
+      .primary-artefacts, .artefact-grid { grid-template-rows: none; grid-auto-rows: auto; gap: 12px; }
+      .primary-artefacts .artefact, .artefact-grid .artefact { height: auto; }
+      .image-area { flex: none; width: 100%; aspect-ratio: 16 / 9; }
+      .image-area img { position: absolute; inset: 0; }
+      #firstPage .field input, #firstPage .field select { height: 44px; font-size: 16px; }
+      #firstPage .date-row button { min-height: 44px; }
+      .image-tools button { min-height: 44px; padding: 6px 10px; font-size: 12px; }
+      .page .empty-image { min-height: 100%; }
+      #firstPage .remarks-section { grid-template-columns: 1fr; gap: 6px; }
+      #remarks { height: 84px; font-size: 16px; }
+      .page footer { flex-wrap: wrap; }
+    }
+    @media screen and (max-width: 540px) {
+      .metadata { grid-template-columns: 1fr; }
+      #firstPage .field { padding: 8px 10px; border-right: 0; border-bottom: 1px solid var(--line); }
+      #firstPage .field:last-child { border-bottom: 0; }
+      #firstPage .report-header { align-items: flex-start; flex-direction: column; gap: 6px; }
+      #firstPage .classification { text-align: left; }
+      #firstPage .classification br { display: none; }
+      #firstPage .classification { word-spacing: 3px; }
+      .date-shift { grid-template-columns: minmax(0, 1fr) 92px; }
+      .date-row { flex-wrap: wrap; }
+      .date-row input { flex-basis: 100%; }
+      .section-heading { flex-wrap: wrap; gap: 4px; }
+      .report-header h1 { font-size: 20px !important; }
+      .page .empty-image { gap: 2px; font-size: 10px; padding: 8px; }
+      .paste-symbol { width: 20px; height: 20px; margin: 0; }
+    }
+    @media (pointer: coarse) {
+      .nav-link, .upcoming-link { min-height: 44px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
     @page { size: Letter; margin: .48in .55in; }
@@ -173,7 +244,8 @@
       .field input, .field select, #remarks, .caption { display: none; }
       .print-value { display: block; white-space: pre-wrap; overflow-wrap: anywhere; }
       .field .print-value { min-height: 25px; font-size: 13px; }
-      .remarks-print { min-height: 94px; border: 1px solid var(--line); padding: 9px 11px; font-size: 12px; line-height: 1.45; }
+      .remarks-print { min-height: 44px; border: 1px solid var(--line); padding: 5px 8px; font-size: 12px; line-height: 1.45; }
+      #firstPage .field .print-value { min-height: 27px; font-size: 12px; }
       figcaption .print-value { font-size: 11px; }
       .image-area { background: #fff; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -193,32 +265,35 @@
   </defs></svg>
   <a class="skip-link no-print" href="#report">Skip to report</a>
   <div class="app-shell">
-    <aside class="sidebar no-print" aria-label="Workspace navigation">
+    <button class="nav-backdrop no-print" id="navBackdrop" type="button" aria-label="Close navigation" tabindex="-1"></button>
+    <aside class="sidebar no-print" id="workspaceNav" aria-label="Workspace navigation">
       <div class="brand-lockup"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><div><span class="brand-name">ODC Managed</span><span class="brand-subtitle">Audit workspace</span></div></div>
       <p class="nav-label">Workspace</p>
-      <nav aria-label="Audit tools"><a class="nav-link current" href="#report" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>PAM report generator</a></nav>
+      <nav aria-label="Audit tools"><a class="nav-link current" href="#report" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>PAM Report Generator</a></nav>
+      <button class="upcoming-link" id="teamDocumentsButton" type="button" aria-expanded="false" aria-controls="teamDocumentsNote">Team Documents <span>Soon</span></button>
+      <p class="upcoming-note" id="teamDocumentsNote" role="status" hidden>Team Documents is coming soon. No folder is connected.</p>
       <p class="nav-label">This report</p>
       <nav aria-label="Report sections">
-        <a class="nav-link" href="#reportDetails"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>Report details</a>
-        <a class="nav-link" href="#primaryArtefacts"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>PAM artefacts</a>
-        <a class="nav-link" href="#exportControls"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export document</a>
+        <a class="nav-link" href="#reportDetails"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>Report Details</a>
+        <a class="nav-link" href="#primaryArtefacts"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>PAM Artefacts</a>
+        <a class="nav-link" href="#exportControls"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export Document</a>
       </nav>
       <div class="sidebar-foot"><strong>Internal audit</strong>Privileged Access Management</div>
     </aside>
     <div class="app-main">
-      <header class="app-header no-print"><div class="breadcrumb"><span>ODC Workspace</span><span aria-hidden="true">/</span><span>Internal audit</span><span aria-hidden="true">/</span><strong>PAM report</strong></div><span class="environment-badge"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>Internal use</span></header>
+      <header class="app-header no-print"><div class="header-location"><button class="menu-button" id="menuButton" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="workspaceNav"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><div class="breadcrumb"><span>ODC Workspace</span><span aria-hidden="true">/</span><span>Internal audit</span><span aria-hidden="true">/</span><strong>PAM report</strong></div></div><span class="environment-badge"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>Internal use</span></header>
       <div class="dashboard no-print">
-        <div class="title-row"><div><p class="dashboard-kicker">Document workspace</p><h2 class="dashboard-title">PAM report generator</h2></div><button id="newButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>New report</button></div>
+        <div class="title-row"><div><p class="dashboard-kicker">Document Workspace</p><h2 class="dashboard-title">PAM Report Generator</h2></div><button id="newButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>New Report</button></div>
         <section class="overview" aria-label="Report overview">
-          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><div><span class="stat-label">Pages in export</span><span class="stat-value" id="pageCount">1</span></div></div>
-          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg></span><div><span class="stat-label">Artefacts in export</span><span class="stat-value" id="artefactCount">0</span></div></div>
-          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><div><span class="stat-label">Document format</span><span class="stat-value format">US Letter</span></div></div>
+          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><div><span class="stat-label">To Export</span><span class="stat-value" id="pageCount">1</span></div></div>
+          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg></span><div><span class="stat-label">Artefacts Count</span><span class="stat-value" id="artefactCount">0</span></div></div>
+          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><div><span class="stat-label">Report Date</span><span class="stat-value format" id="reportDateSummary">Not specified</span></div></div>
         </section>
   <section class="controls no-print" id="exportControls" aria-label="Report controls">
     <div class="toolbar-main">
-      <div class="control-label">Document actions<small>Export the selected report pages</small></div>
+      <div class="control-label">Document Actions<small>Export the selected report pages</small></div>
       <div class="actions">
-        <button id="clearButton" class="subtle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>Clear images</button>
+        <button id="clearButton" class="subtle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>Clear Images</button>
         <button id="wordButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>Word (.doc)</button>
         <button class="primary" id="printButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Save PDF / Print</button>
       </div>
@@ -231,7 +306,7 @@
     <p id="status" role="status" aria-live="polite" hidden></p>
     <p id="overflowWarning" role="alert" hidden>Remarks exceed the available space. Shorten them before exporting.</p>
   </section>
-        <div class="preview-heading"><h2>Document preview</h2><span>8.5 × 11 in · Two artefacts per page · Click fields to edit</span></div>
+        <div class="preview-heading"><h2>Document Preview</h2><span>8.5 × 11 in · Two artefacts per page · Click fields to edit</span></div>
       </div>
   <main class="workspace" id="report" aria-label="Report preview">
     <article class="page" id="firstPage" aria-label="Report page 1">
@@ -451,9 +526,16 @@
       } finally { busy = false; document.querySelectorAll('.controls button').forEach(button => button.disabled = false); }
     }
     function syncPrint() {
+      $('reportDateSummary').textContent = formattedDate($('reportDate').value);
       document.querySelectorAll('[data-for]').forEach(span => { const id = span.dataset.for; span.textContent = id === 'reportDate' ? formattedDate($(id).value) : $(id).value.trim() || 'Not specified'; });
       $('remarksPrint').textContent = $('remarks').value.trim() || 'No remarks recorded.';
-      $('overflowWarning').hidden = $('remarks').scrollHeight <= $('remarks').clientHeight + 2;
+      // Validate against the paper layout, not the device's editor width/font size.
+      const measure = document.createElement('textarea');
+      measure.setAttribute('aria-hidden', 'true'); measure.tabIndex = -1;
+      measure.style.cssText = 'position:fixed;left:-10000px;top:0;width:606px;height:44px;padding:5px 8px;border:1px solid;box-sizing:border-box;font:12px/1.45 Arial;visibility:hidden;';
+      measure.value = $('remarks').value; document.body.append(measure);
+      $('overflowWarning').hidden = measure.scrollHeight <= measure.clientHeight + 2;
+      measure.remove();
     }
     function canExport() {
       syncPrint();
@@ -464,8 +546,8 @@
     function esc(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
     function buildWord() {
       const footer = (page, total) => '<p style="border-top:1px solid #ccd6e0;padding-top:8px;color:#586b7e;font-size:8pt">ODC Managed - PAM Internal Audit Tool <span style="float:right">Page ' + page + ' of ' + total + '</span></p>';
-      const imageHtml = (record, index, extra = false) => {
-        const maxWidth = 690, maxHeight = extra ? 340 : 190;
+      const imageHtml = (record, index) => {
+        const maxWidth = 690, maxHeight = 294;
         const preview = document.querySelector('.image-area[data-index="' + index + '"] img');
         const width = record && (record.width || (preview && preview.naturalWidth)) || maxWidth;
         const height = record && (record.height || (preview && preview.naturalHeight)) || maxHeight;
@@ -474,15 +556,33 @@
         return '<table width="100%" style="border-collapse:collapse;margin:10px 0;page-break-inside:avoid"><tr><td align="center" height="' + maxHeight + '" style="border:1px solid #ccd6e0">' + (record ? '<img alt="PAM artefact ' + (index + 1) + '" src="' + esc(record.src) + '" width="' + w + '" height="' + h + '" style="width:' + w + 'px;height:' + h + 'px">' : '&nbsp;') + '</td></tr><tr><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt"><b>Artefact ' + (index + 1) + '</b></td></tr></table>';
       };
       const count = includeAppendix ? additionalPages : 0;
-      const cell = (label, value) => '<td width="50%" style="border:1px solid #ccd6e0;padding:9px"><b style="color:#586b7e;font-size:8pt">' + label + '</b><br>' + esc(value || 'Not specified') + '</td>';
-      let body = '<h1>PAM Summary Report</h1><p>Privileged Access Management</p><table width="100%" style="border-collapse:collapse"><tr>' + cell('User name', $('user').value) + cell('PAM username', $('username').value) + '</tr><tr>' + cell('Report date / Shift', formattedDate($('reportDate').value) + ' / ' + $('shift').value) + cell('User IP address', $('ip').value) + '</tr></table><h2>PAM Artefacts</h2>' + imageHtml(images[0], 0) + imageHtml(images[1], 1) + '<h2>Audit remarks</h2><div style="border:1px solid #ccd6e0;padding:10px;min-height:70px">' + esc($('remarks').value.trim() || 'No remarks recorded.').replace(/\n/g, '<br>') + '</div>' + footer(1, count + 1);
+      const cell = (label, value) => '<td width="50%" style="border:1px solid #ccd6e0;padding:4px 8px"><b style="color:#586b7e;font-size:7pt">' + label + '</b><br>' + esc(value || 'Not specified') + '</td>';
+      let body = '<h1 style="margin:0;font-size:17pt">PAM Summary Report</h1><p style="margin:3px 0 6px;font-size:8pt">Privileged Access Management</p><table width="100%" style="border-collapse:collapse"><tr>' + cell('User name', $('user').value) + cell('PAM username', $('username').value) + '</tr><tr>' + cell('Report date / Shift', formattedDate($('reportDate').value) + ' / ' + $('shift').value) + cell('User IP address', $('ip').value) + '</tr></table><h2 style="margin:6px 0 0;font-size:9pt">PAM Artefacts</h2>' + imageHtml(images[0], 0) + imageHtml(images[1], 1) + '<table width="100%" style="border-collapse:collapse"><tr><td width="14%" valign="top" style="font-size:8pt"><b>Audit remarks</b></td><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt">' + esc($('remarks').value.trim() || 'No remarks recorded.').replace(/\n/g, '<br>') + '</td></tr></table>' + footer(1, count + 1);
       for (let p = 0; p < count; p++) {
         body += '<div style="page-break-before:always"><h1>Additional PAM Artefacts</h1><p>PAM Summary Report · ' + esc(formattedDate($('reportDate').value)) + '</p>';
-        for (let row = 0; row < 2; row++) { const index = 2 + p * 2 + row; body += imageHtml(images[index], index, true); }
+        for (let row = 0; row < 2; row++) { const index = 2 + p * 2 + row; body += imageHtml(images[index], index); }
         body += footer(p + 2, count + 1) + '</div>';
       }
       return '<!DOCTYPE html><html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>PAM Summary Report</title><style>@page{size:8.5in 11in;margin:.48in .55in}body{font-family:Arial;color:#213346;font-size:10pt}h1{font-size:20pt;color:#18324f}h2{font-size:11pt;color:#18324f;border-bottom:1px solid #ccd6e0;padding-bottom:5px}td{font-family:Arial;font-size:10pt}</style></head><body>' + body + '</body></html>';
     }
+    function setNavigation(open) {
+      document.body.classList.toggle('nav-open', open);
+      $('menuButton').setAttribute('aria-expanded', String(open));
+      $('menuButton').setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+      if (open) $('workspaceNav').querySelector('a').focus();
+    }
+    $('menuButton').addEventListener('click', () => setNavigation(!$('menuButton').matches('[aria-expanded="true"]')));
+    $('navBackdrop').addEventListener('click', () => { setNavigation(false); $('menuButton').focus(); });
+    $('workspaceNav').addEventListener('click', event => { if (event.target.closest('a')) setNavigation(false); });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && document.body.classList.contains('nav-open')) { setNavigation(false); $('menuButton').focus(); }
+    });
+    window.matchMedia('(min-width: 1181px)').addEventListener('change', () => setNavigation(false));
+    $('teamDocumentsButton').addEventListener('click', () => {
+      const expanded = $('teamDocumentsButton').getAttribute('aria-expanded') !== 'true';
+      $('teamDocumentsButton').setAttribute('aria-expanded', String(expanded));
+      $('teamDocumentsNote').hidden = !expanded;
+    });
     $('includeAppendix').addEventListener('change', () => { includeAppendix = $('includeAppendix').checked; render(); save(); });
     $('addPageButton').addEventListener('click', () => { if (busy) return; additionalPages++; render(); save(); const page = $('appendixPages').lastElementChild; page.scrollIntoView({ behavior: 'smooth', block: 'start' }); page.querySelector('.image-area').focus({ preventScroll: true }); });
     $('removePageButton').addEventListener('click', () => { if (busy || additionalPages <= 1) return; const start = 2 + (additionalPages - 1) * 2; if (images.slice(start).some(Boolean) && !confirm('Remove the last page and its attached images?')) return; images = images.slice(0, start); additionalPages--; render(); save(); });
