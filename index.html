@@ -48,7 +48,7 @@
     .section-heading { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
     .section-note { color: var(--muted); font-size: 10px; }
     .primary-artefacts { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
-    .artefact-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 16px; flex: 1; min-height: 0; }
+    .artefact-grid { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 16px; flex: 1; min-height: 0; }
     .artefact { margin: 0; border: 1px solid var(--line); border-radius: 4px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: #fff; }
     .primary-artefacts .artefact { flex: 1; }
     .image-area { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
@@ -89,7 +89,6 @@
 <body>
   <header class="app-header no-print">
     <p class="brand">ODC · PAM Internal Audit Tool</p>
-    <p>Prepare a consistent audit record, attach PAM artefacts, and export your report.</p>
   </header>
   <section class="controls no-print" aria-label="Report controls">
     <div class="actions">
@@ -99,7 +98,8 @@
       <button id="newButton" type="button">New report</button>
     </div>
     <div class="options">
-      <label class="check"><input id="includeAppendix" type="checkbox"> More than 2 artefacts? Please tick this box.</label>
+      <label class="check"><input id="includeAppendix" type="checkbox"> Multiple artefacts (3+)</label>
+      <div id="pageControls" class="actions" hidden><button id="addPageButton" type="button">Add page</button><button id="removePageButton" type="button">Remove last page</button></div>
       <span id="pageSummary" class="section-note"></span>
     </div>
     <p id="status" role="status" aria-live="polite" hidden></p>
@@ -137,6 +137,7 @@
     const fieldIds = ['user', 'username', 'ip', 'reportDate', 'shift', 'remarks'];
     let images = [null, null];
     let includeAppendix = false;
+    let additionalPages = 1;
     let targetSlot = null;
     let saveTimer;
     let busy = false;
@@ -162,7 +163,7 @@
     function validImage(src) { return typeof src === 'string' && /^data:image\/(png|jpeg|jpg|webp|gif|bmp);base64,/i.test(src); }
     function imageRecord(value) {
       const record = typeof value === 'string' ? { src: value, caption: '' } : value;
-      return record && validImage(record.src) ? { src: record.src, caption: String(record.caption || '').slice(0, 180) } : null;
+      return record && validImage(record.src) ? { src: record.src, caption: String(record.caption || '').slice(0, 180), width: Number(record.width) || 0, height: Number(record.height) || 0 } : null;
     }
     function setStatus(message, warning = false) {
       $('status').textContent = warning ? message : '';
@@ -170,7 +171,7 @@
       $('status').classList.toggle('warning', warning);
     }
     function draft() {
-      return { fields: Object.fromEntries(fieldIds.map(id => [id, $(id).value])), images, includeAppendix };
+      return { fields: Object.fromEntries(fieldIds.map(id => [id, $(id).value])), images, includeAppendix, additionalPages };
     }
     function save() {
       clearTimeout(saveTimer);
@@ -197,6 +198,7 @@
           if (!['Morning', 'Mid', 'Night'].includes($('shift').value)) $('shift').value = defaultShift();
           if (Array.isArray(data.images)) images = [imageRecord(data.images[0]), imageRecord(data.images[1]), ...data.images.slice(2).map(imageRecord)];
           includeAppendix = typeof data.includeAppendix === 'boolean' ? data.includeAppendix : images.length > 2;
+          additionalPages = Math.max(1, Math.ceil((images.length - 2) / 2), Number.isSafeInteger(data.additionalPages) && data.additionalPages > 0 ? data.additionalPages : 1);
           setStatus(current ? 'Saved draft restored.' : 'Previous report draft restored.');
         } else setStatus('Ready. Your draft will be saved in this browser.');
       } catch (error) { setStatus('The saved draft could not be read. A new report is ready.', true); }
@@ -236,9 +238,11 @@
     }
     function render() {
       $('includeAppendix').checked = includeAppendix;
+      $('pageControls').hidden = !includeAppendix;
+      $('removePageButton').hidden = additionalPages <= 1;
       $('primaryArtefacts').replaceChildren(createArtefact(0), createArtefact(1));
       $('appendixPages').replaceChildren();
-      const appendixCount = includeAppendix ? Math.max(1, Math.ceil((images.length - 2) / 4)) : 0;
+      const appendixCount = includeAppendix ? additionalPages : 0;
       const total = 1 + appendixCount;
       $('firstPage').querySelector('.page-number').textContent = 'Page 1 of ' + total;
       for (let pageIndex = 0; pageIndex < appendixCount; pageIndex++) {
@@ -250,10 +254,10 @@
         const subtitle = document.createElement('p'); subtitle.className = 'subtitle'; subtitle.textContent = 'Supporting material · ' + formattedDate($('reportDate').value);
         titles.append(eyebrow, heading, subtitle); header.append(titles);
         const grid = document.createElement('section'); grid.className = 'artefact-grid'; grid.setAttribute('aria-label', 'Additional artefacts');
-        const start = 2 + pageIndex * 4;
-        for (let i = start; i < start + 4; i++) grid.append(createArtefact(i));
+        const start = 2 + pageIndex * 2;
+        for (let i = start; i < start + 2; i++) grid.append(createArtefact(i));
         page.tabIndex = 0;
-        page.addEventListener('click', () => { const empty = Array.from({ length: 4 }, (_, k) => start + k).find(i => !images[i]); activate(empty === undefined ? images.length : empty); page.focus(); });
+        page.addEventListener('click', () => { const empty = Array.from({ length: 2 }, (_, k) => start + k).find(i => !images[i]); activate(empty === undefined ? 2 + additionalPages * 2 : empty); page.focus(); });
         const footer = document.createElement('footer');
         const brand = document.createElement('span'); brand.textContent = 'ODC Managed - PAM Internal Audit Tool';
         const pageNumber = document.createElement('span'); pageNumber.textContent = 'Page ' + (pageIndex + 2) + ' of ' + total;
@@ -276,7 +280,7 @@
       const scale = Math.min(1, 2000 / Math.max(image.naturalWidth, image.naturalHeight));
       const canvas = document.createElement('canvas'); canvas.width = Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
       const context = canvas.getContext('2d'); context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      return { src: canvas.toDataURL('image/jpeg', .9), caption: '' };
+      return { src: canvas.toDataURL('image/jpeg', .9), caption: '', width: canvas.width, height: canvas.height };
     }
     async function addFiles(files, index = null) {
       if (busy) return;
@@ -293,7 +297,8 @@
             const record = await readImage(file);
             let slot = index !== null ? index : images.slice(0, 2).indexOf(null);
             if (slot < 0 && includeAppendix) { slot = images.findIndex((image, i) => i >= 2 && !image); if (slot < 0) slot = images.length; }
-            if (slot < 0 || (slot >= 2 && !includeAppendix)) { blockedMessage = 'More than 2 artefacts? Please tick the box to enable page 2, then paste again.'; break; }
+            if (slot < 0 || (slot >= 2 && !includeAppendix)) { blockedMessage = 'Tick “Multiple artefacts (3+)” to enable page 2, then paste again.'; break; }
+            if (slot >= 2 + additionalPages * 2) { blockedMessage = 'All available spaces are filled. Select “Add page”, then paste your next screenshot.'; break; }
             while (images.length <= slot) images.push(null);
             images[slot] = record;
             lastSlot = slot;
@@ -322,31 +327,37 @@
     function esc(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
     function buildWord() {
       const footer = (page, total) => '<p style="border-top:1px solid #ccd6e0;padding-top:8px;color:#586b7e;font-size:8pt">ODC Managed - PAM Internal Audit Tool <span style="float:right">Page ' + page + ' of ' + total + '</span></p>';
-      const imageHtml = (record, index, extra = false) => '<table width="100%" style="border-collapse:collapse;margin:10px 0;page-break-inside:avoid"><tr><td align="center" height="' + (extra ? 230 : 180) + '" style="border:1px solid #ccd6e0">' + (record ? '<img alt="PAM artefact ' + (index + 1) + '" src="' + esc(record.src) + '" style="max-width:' + (extra ? '3.2' : '7') + 'in;max-height:' + (extra ? '2.4' : '1.8') + 'in">' : '&nbsp;') + '</td></tr><tr><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt"><b>Artefact ' + (index + 1) + '</b>' + (record && record.caption ? ' — ' + esc(record.caption) : '') + '</td></tr></table>';
-      const count = includeAppendix ? Math.max(1, Math.ceil((images.length - 2) / 4)) : 0;
+      const imageHtml = (record, index, extra = false) => {
+        const maxWidth = 690, maxHeight = extra ? 340 : 190;
+        const preview = document.querySelector('.image-area[data-index="' + index + '"] img');
+        const width = record && (record.width || (preview && preview.naturalWidth)) || maxWidth;
+        const height = record && (record.height || (preview && preview.naturalHeight)) || maxHeight;
+        const scale = Math.min(maxWidth / width, maxHeight / height, 1);
+        const w = Math.round(width * scale), h = Math.round(height * scale);
+        return '<table width="100%" style="border-collapse:collapse;margin:10px 0;page-break-inside:avoid"><tr><td align="center" height="' + maxHeight + '" style="border:1px solid #ccd6e0">' + (record ? '<img alt="PAM artefact ' + (index + 1) + '" src="' + esc(record.src) + '" width="' + w + '" height="' + h + '" style="width:' + w + 'px;height:' + h + 'px">' : '&nbsp;') + '</td></tr><tr><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt"><b>Artefact ' + (index + 1) + '</b></td></tr></table>';
+      };
+      const count = includeAppendix ? additionalPages : 0;
       const cell = (label, value) => '<td width="50%" style="border:1px solid #ccd6e0;padding:9px"><b style="color:#586b7e;font-size:8pt">' + label + '</b><br>' + esc(value || 'Not specified') + '</td>';
       let body = '<h1>PAM Summary Report</h1><p>Privileged Access Management</p><table width="100%" style="border-collapse:collapse"><tr>' + cell('User name', $('user').value) + cell('PAM username', $('username').value) + '</tr><tr>' + cell('Report date / Shift', formattedDate($('reportDate').value) + ' / ' + $('shift').value) + cell('User IP address', $('ip').value) + '</tr></table><h2>PAM Artefacts</h2>' + imageHtml(images[0], 0) + imageHtml(images[1], 1) + '<h2>Audit remarks</h2><div style="border:1px solid #ccd6e0;padding:10px;min-height:70px">' + esc($('remarks').value.trim() || 'No remarks recorded.').replace(/\n/g, '<br>') + '</div>' + footer(1, count + 1);
       for (let p = 0; p < count; p++) {
-        body += '<div style="page-break-before:always"><h1>Additional PAM Artefacts</h1><p>PAM Summary Report · ' + esc(formattedDate($('reportDate').value)) + '</p><table width="100%" style="table-layout:fixed;border-collapse:collapse">';
-        for (let row = 0; row < 2; row++) {
-          body += '<tr>';
-          for (let col = 0; col < 2; col++) { const index = 2 + p * 4 + row * 2 + col; body += '<td width="50%" valign="top" style="padding:5px">' + (images[index] ? imageHtml(images[index], index, true) : '&nbsp;') + '</td>'; }
-          body += '</tr>';
-        }
-        body += '</table>' + footer(p + 2, count + 1) + '</div>';
+        body += '<div style="page-break-before:always"><h1>Additional PAM Artefacts</h1><p>PAM Summary Report · ' + esc(formattedDate($('reportDate').value)) + '</p>';
+        for (let row = 0; row < 2; row++) { const index = 2 + p * 2 + row; body += imageHtml(images[index], index, true); }
+        body += footer(p + 2, count + 1) + '</div>';
       }
       return '<!DOCTYPE html><html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>PAM Summary Report</title><style>@page{size:8.5in 11in;margin:.48in .55in}body{font-family:Arial;color:#213346;font-size:10pt}h1{font-size:20pt;color:#18324f}h2{font-size:11pt;color:#18324f;border-bottom:1px solid #ccd6e0;padding-bottom:5px}td{font-family:Arial;font-size:10pt}</style></head><body>' + body + '</body></html>';
     }
     $('includeAppendix').addEventListener('change', () => { includeAppendix = $('includeAppendix').checked; render(); save(); });
+    $('addPageButton').addEventListener('click', () => { if (busy) return; additionalPages++; render(); save(); const page = $('appendixPages').lastElementChild; page.scrollIntoView({ behavior: 'smooth', block: 'start' }); page.querySelector('.image-area').focus({ preventScroll: true }); });
+    $('removePageButton').addEventListener('click', () => { if (busy || additionalPages <= 1) return; const start = 2 + (additionalPages - 1) * 2; if (images.slice(start).some(Boolean) && !confirm('Remove the last page and its attached images?')) return; images = images.slice(0, start); additionalPages--; render(); save(); });
     $('todayButton').addEventListener('click', () => { $('reportDate').value = localDate(); render(); save(); });
     fieldIds.forEach(id => $(id).addEventListener('input', () => { syncPrint(); scheduleSave(); if (id === 'reportDate') document.querySelectorAll('.appendix .subtitle').forEach(p => p.textContent = 'Supporting material · ' + formattedDate($('reportDate').value)); }));
     $('clearButton').addEventListener('click', () => { if (confirm('Remove all attached images? Report details and remarks will be kept.')) { images = [null, null]; render(); save(); } });
-    $('newButton').addEventListener('click', () => { if (confirm('Start a new report? This will replace the current draft, including all images.')) { fieldIds.forEach(id => $(id).value = ''); $('reportDate').value = localDate(); $('shift').value = defaultShift(); images = [null, null]; includeAppendix = false; render(); save(); } });
+    $('newButton').addEventListener('click', () => { if (confirm('Start a new report? This will replace the current draft, including all images.')) { fieldIds.forEach(id => $(id).value = ''); $('reportDate').value = localDate(); $('shift').value = defaultShift(); images = [null, null]; includeAppendix = false; additionalPages = 1; render(); save(); } });
     document.addEventListener('paste', event => { const files = [...(event.clipboardData ? event.clipboardData.items : [])].filter(item => item.type.startsWith('image/')).map(item => item.getAsFile()).filter(Boolean); if (files.length) { event.preventDefault(); addFiles(files, targetSlot); } });
     // Clipboard images only: block file drops without importing them.
     document.addEventListener('dragover', event => { if ([...(event.dataTransfer.types || [])].includes('Files')) event.preventDefault(); });
     document.addEventListener('drop', event => { if (event.dataTransfer.files.length) { event.preventDefault(); setStatus('Use Snipping Tool and Ctrl+V to paste screenshots. File uploads and drops are disabled.', true); } });
-    document.addEventListener('click', event => { if (!event.target.closest('.image-area, .appendix')) { targetSlot = null; document.querySelectorAll('.image-area.active').forEach(area => area.classList.remove('active')); } });
+    document.addEventListener('click', event => { if (!event.target.closest('.image-area, .appendix, #addPageButton')) { targetSlot = null; document.querySelectorAll('.image-area.active').forEach(area => area.classList.remove('active')); } });
     $('printButton').addEventListener('click', () => { if (canExport()) window.print(); });
     $('wordButton').addEventListener('click', () => {
       if (!canExport()) return;
