@@ -285,6 +285,28 @@
       .metadata .field:last-child { grid-column: auto; }
       .metadata .field:not(:last-child) { border-right: 0; border-bottom: 1px solid var(--line); }
     }
+    .date-control { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 40px; padding: 8px 10px; margin-top: 5px; border: 1px solid #dbe3ee; border-radius: 7px; background: #f8fafd; color: #20334d; font-size: 13px; font-weight: 600; }
+    .date-control:hover { background: #fff; border-color: #8da6d0; }
+    .date-control:focus-within { outline: 3px solid #dce6ff; border-color: #6383d8; }
+    .date-card .date-control input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; max-width: none; margin: 0; cursor: pointer; }
+    .date-control .icon { color: #526b92; }
+    .remarks-section, #firstPage .remarks-section { position: relative; display: grid; grid-template-columns: 94px minmax(0, 1fr); gap: 6px 10px; align-items: start; flex: none; }
+    #remarksHint { grid-column: 2; color: var(--muted); font-size: 10px; }
+    #remarks { height: 44px; overflow-y: auto; }
+    .remarks-print { grid-column: 2; }
+    .remarks-content { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.45 Arial; padding: 5px 8px; border: 1px solid var(--line); }
+    @media screen and (max-width: 650px) {
+      .overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .overview .stat-card:last-child { grid-column: 1 / -1; }
+      .date-control { min-height: 44px; font-size: 16px; }
+      .remarks-section, #firstPage .remarks-section { grid-template-columns: 1fr; }
+      #remarksHint { grid-column: 1; }
+    }
+    @media print {
+      #remarksHint { display: none; }
+      .remarks-section, #firstPage .remarks-section { grid-template-columns: 94px minmax(0, 1fr); }
+      .remarks-print { margin: 0; }
+    }
   </style>
 </head>
 <body>
@@ -322,7 +344,7 @@
         <section class="overview" aria-label="Report overview">
           <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><div><span class="stat-label">To Export</span><span class="stat-value" id="pageCount">1</span></div></div>
           <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg></span><div><span class="stat-label">Artefacts Count</span><span class="stat-value" id="artefactCount">0</span></div></div>
-          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><div class="date-card"><label class="stat-label" for="reportDate">Report Date</label><input id="reportDate" type="date"></div></div>
+          <div class="stat-card"><div class="date-card"><label class="stat-label" for="reportDate">Report Date</label><div class="date-control"><span id="dateDisplay" aria-hidden="true"></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18"/></svg><input id="reportDate" type="date" aria-label="Report date"></div></div></div>
         </section>
   <section class="controls no-print" id="exportControls" aria-label="Report controls">
     <div class="toolbar-main">
@@ -352,16 +374,17 @@
       <section class="metadata" id="reportDetails" aria-label="Report details">
         <div class="field"><label class="field-label" for="user">User</label><input id="user" autocomplete="off" placeholder="zexjohndoe" maxlength="120"><span class="print-value" data-for="user"></span></div>
         <div class="field"><label class="field-label" for="username">Account Username</label><input id="username" autocomplete="off" placeholder="e.g. pamadm" maxlength="120"><span class="print-value" data-for="username"></span></div>
-        <div class="field"><label class="field-label" for="shift">Shift</label><select id="shift"><option value="">Not specified</option><option>Morning</option><option>Mid</option><option>Night</option></select><span class="print-value" data-for="shift"></span></div>
+        <div class="field"><label class="field-label" for="shift">Shift</label><select id="shift"><option>Morning</option><option>Mid</option><option>Night</option></select><span class="print-value" data-for="shift"></span></div>
         <div class="field"><label class="field-label" for="ip">User IP</label><input id="ip" autocomplete="off" placeholder="e.g. 10.0.0.1" maxlength="80"><span class="print-value" data-for="ip"></span></div>
         <div class="field"><label class="field-label" for="accountAddress">Account Address</label><input id="accountAddress" autocomplete="off" placeholder="e.g. 10.255.255.255" maxlength="120"><span class="print-value" data-for="accountAddress"></span></div>
       </section>
       <div class="section-heading"><h2 class="section-title">PAM Artefacts</h2><span class="section-note">Primary supporting material</span></div>
       <section id="primaryArtefacts" class="primary-artefacts" aria-label="Primary PAM artefacts"></section>
-      <section class="remarks-section"><label class="section-title" for="remarks">Audit remarks</label><textarea id="remarks" placeholder="Record observations, exceptions, and required follow-up actions."></textarea><div id="remarksPrint" class="print-value remarks-print"></div></section>
+      <section class="remarks-section" id="remarksSection"><label class="section-title" for="remarks">Audit remarks</label><textarea id="remarks" placeholder="Record observations, exceptions, and required follow-up actions." aria-describedby="remarksHint"></textarea><small id="remarksHint" class="no-print">Long remarks continue automatically on additional report pages.</small><div id="remarksPrint" class="print-value remarks-print"></div></section>
       <footer><span>ODC Managed - PAM Internal Audit Tool</span><span class="page-number"></span></footer>
     </article>
     <div id="appendixPages"></div>
+    <div id="remarksPages"></div>
   </main>
     </div>
   </div>
@@ -386,7 +409,7 @@
       const d = new Date();
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
-    function defaultShift() { return ''; }
+    function defaultShift() { return 'Morning'; }
     function normalizeDate(value) {
       if (typeof value !== 'string') return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
@@ -483,6 +506,7 @@
       $('pageControls').hidden = !includeAppendix;
       $('removePageButton').hidden = additionalPages <= 1;
       $('primaryArtefacts').replaceChildren(createArtefact(0), createArtefact(1));
+      $('firstPage').insertBefore($('remarksSection'), $('firstPage').querySelector('footer'));
       $('appendixPages').replaceChildren();
       const appendixCount = includeAppendix ? additionalPages : 0;
       const total = 1 + appendixCount;
@@ -502,7 +526,7 @@
         page.addEventListener('click', () => { const empty = Array.from({ length: 2 }, (_, k) => start + k).find(i => !images[i]); activate(empty === undefined ? 2 + additionalPages * 2 : empty); page.focus(); });
         const footer = document.createElement('footer');
         const brand = document.createElement('span'); brand.textContent = 'ODC Managed - PAM Internal Audit Tool';
-        const pageNumber = document.createElement('span'); pageNumber.textContent = 'Page ' + (pageIndex + 2) + ' of ' + total;
+        const pageNumber = document.createElement('span'); pageNumber.className = 'page-number'; pageNumber.textContent = 'Page ' + (pageIndex + 2) + ' of ' + total;
         footer.append(brand, pageNumber); page.append(header, grid, footer); $('appendixPages').append(page);
       }
       const exportedArtefacts = images.slice(0, total * 2).filter(Boolean).length;
@@ -565,19 +589,55 @@
     }
     function syncPrint() {
       $('reportDateSummary').textContent = formattedDate($('reportDate').value);
+      $('dateDisplay').textContent = $('reportDate').value ? new Date($('reportDate').value + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Select date';
       document.querySelectorAll('[data-for]').forEach(span => { const id = span.dataset.for; span.textContent = id === 'reportDate' ? formattedDate($(id).value) : $(id).value.trim() || 'Not specified'; });
-      $('remarksPrint').textContent = $('remarks').value.trim() || 'No remarks recorded.';
-      // Validate against the paper layout, not the device's editor width/font size.
-      const measure = document.createElement('textarea');
-      measure.setAttribute('aria-hidden', 'true'); measure.tabIndex = -1;
-      measure.style.cssText = 'position:fixed;left:-10000px;top:0;width:606px;height:44px;padding:5px 8px;border:1px solid;box-sizing:border-box;font:12px/1.45 Arial;visibility:hidden;';
-      measure.value = $('remarks').value; document.body.append(measure);
-      $('overflowWarning').hidden = measure.scrollHeight <= measure.clientHeight + 2;
+      paginateRemarks();
+    }
+    let remarksChunks = [];
+    function paginateRemarks() {
+      const last = $('appendixPages').lastElementChild || $('firstPage');
+      last.insertBefore($('remarksSection'), last.querySelector('footer'));
+      const measure = document.createElement('div');
+      measure.style.cssText = 'position:fixed;left:-10000px;top:0;width:640px;padding:5px 8px;border:1px solid;box-sizing:border-box;font:12px/1.45 Arial;white-space:pre-wrap;overflow-wrap:anywhere;visibility:hidden;';
+      document.body.append(measure);
+      let remaining = $('remarks').value.trim() || 'No remarks recorded.';
+      remarksChunks = [];
+      while (remaining.length) {
+        const limit = remarksChunks.length ? 780 : 44;
+        let low = 1, high = remaining.length, fit = 1;
+        while (low <= high) {
+          const mid = Math.floor((low + high) / 2);
+          measure.textContent = remaining.slice(0, mid);
+          if (measure.offsetHeight <= limit) { fit = mid; low = mid + 1; } else high = mid - 1;
+        }
+        // Prefer a word boundary, but still split very long tokens without losing text.
+        if (fit < remaining.length) {
+          const boundary = Math.max(remaining.lastIndexOf(' ', fit - 1), remaining.lastIndexOf('\n', fit - 1));
+          if (boundary > fit / 2) fit = boundary + 1;
+        }
+        remarksChunks.push(remaining.slice(0, fit)); remaining = remaining.slice(fit);
+      }
       measure.remove();
+      $('remarksPrint').textContent = remarksChunks[0];
+      $('remarksPages').replaceChildren();
+      remarksChunks.slice(1).forEach((chunk, index) => {
+        const page = document.createElement('article'); page.className = 'page appendix remarks-continuation'; page.id = 'remarksPage' + (index + 1);
+        const heading = document.createElement('h2'); heading.className = 'section-title'; heading.textContent = 'Audit remarks — continued';
+        const content = document.createElement('div'); content.className = 'remarks-content'; content.textContent = chunk;
+        const footer = document.createElement('footer'); footer.innerHTML = '<span>ODC Managed - PAM Internal Audit Tool</span><span class="page-number"></span>';
+        page.append(heading, content, footer); $('remarksPages').append(page);
+      });
+      const pages = [...document.querySelectorAll('#report .page')];
+      pages.forEach((page, i) => page.querySelector('.page-number').textContent = 'Page ' + (i + 1) + ' of ' + pages.length);
+      $('pageCount').textContent = pages.length;
+      $('pageNavigation').replaceChildren();
+      pages.forEach((page, i) => {
+        const link = document.createElement('a'); link.href = '#' + page.id; link.textContent = 'Page ' + (i + 1) + (page.classList.contains('remarks-continuation') ? ' · Remarks' : ''); $('pageNavigation').append(link);
+      });
+      $('overflowWarning').hidden = true;
     }
     function canExport() {
       syncPrint();
-      if (!$('overflowWarning').hidden) { alert('Please shorten the audit remarks to fit the available space before exporting.'); $('remarks').focus(); return false; }
       if (busy) { setStatus('Please wait for the images to finish loading.', true); return false; }
       save(); return true;
     }
@@ -593,14 +653,17 @@
         const w = Math.round(width * scale), h = Math.round(height * scale);
         return '<table width="100%" style="border-collapse:collapse;margin:10px 0;page-break-inside:avoid"><tr><td align="center" height="' + maxHeight + '" style="border:1px solid #ccd6e0">' + (record ? '<img alt="PAM artefact ' + (index + 1) + '" src="' + esc(record.src) + '" width="' + w + '" height="' + h + '" style="width:' + w + 'px;height:' + h + 'px">' : '&nbsp;') + '</td></tr><tr><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt"><b>Artefact ' + (index + 1) + '</b></td></tr></table>';
       };
+      syncPrint();
+      const remarksTable = text => '<h2 style="font-size:9pt;margin:6px 0">Audit remarks</h2><div style="white-space:pre-wrap;word-wrap:break-word;font:12px/1.45 Arial;border:1px solid #ccd6e0;padding:5px 8px">' + esc(text) + '</div>';
       const count = includeAppendix ? additionalPages : 0;
       const cell = (label, value) => '<td width="33%" style="border:1px solid #ccd6e0;padding:4px 8px"><b style="color:#586b7e;font-size:7pt">' + label + '</b><br>' + esc(value || 'Not specified') + '</td>';
-      let body = '<h1 style="margin:0;font-size:17pt">PAM Summary Report</h1><p style="margin:3px 0 6px;font-size:8pt">Privileged Access Management · Report date: ' + esc(formattedDate($('reportDate').value)) + '</p><table width="100%" style="border-collapse:collapse"><tr>' + cell('User', $('user').value) + cell('Account Username', $('username').value) + cell('Shift', $('shift').value) + '</tr><tr>' + cell('User IP', $('ip').value) + cell('Account Address', $('accountAddress').value) + '<td width="33%" style="border:1px solid #ccd6e0;padding:4px 8px">&nbsp;</td>' + '</tr></table><h2 style="margin:6px 0 0;font-size:9pt">PAM Artefacts</h2>' + imageHtml(images[0], 0) + imageHtml(images[1], 1) + '<table width="100%" style="border-collapse:collapse"><tr><td width="14%" valign="top" style="font-size:8pt"><b>Audit remarks</b></td><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt">' + esc($('remarks').value.trim() || 'No remarks recorded.').replace(/\n/g, '<br>') + '</td></tr></table>' + footer(1, count + 1);
+      let body = '<h1 style="margin:0;font-size:17pt">PAM Summary Report</h1><p style="margin:3px 0 6px;font-size:8pt">Privileged Access Management · Report date: ' + esc(formattedDate($('reportDate').value)) + '</p><table width="100%" style="border-collapse:collapse"><tr>' + cell('User', $('user').value) + cell('Account Username', $('username').value) + cell('Shift', $('shift').value) + '</tr><tr>' + cell('User IP', $('ip').value) + cell('Account Address', $('accountAddress').value) + '<td width="33%" style="border:1px solid #ccd6e0;padding:4px 8px">&nbsp;</td>' + '</tr></table><h2 style="margin:6px 0 0;font-size:9pt">PAM Artefacts</h2>' + imageHtml(images[0], 0) + imageHtml(images[1], 1) + (count ? '' : remarksTable(remarksChunks[0])) + footer(1, count + remarksChunks.length);
       for (let p = 0; p < count; p++) {
         body += '<div style="page-break-before:always"><h1>Additional PAM Artefacts</h1><p>PAM Summary Report · ' + esc(formattedDate($('reportDate').value)) + '</p>';
         for (let row = 0; row < 2; row++) { const index = 2 + p * 2 + row; body += imageHtml(images[index], index); }
-        body += footer(p + 2, count + 1) + '</div>';
+        body += (p === count - 1 ? remarksTable(remarksChunks[0]) : '') + footer(p + 2, count + remarksChunks.length) + '</div>';
       }
+      remarksChunks.slice(1).forEach((chunk, i) => { body += '<div style="page-break-before:always">' + remarksTable(chunk) + footer(count + 2 + i, count + remarksChunks.length) + '</div>'; });
       return '<!DOCTYPE html><html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>PAM Summary Report</title><style>@page{size:8.5in 11in;margin:.48in .35in}body{font-family:Arial;color:#213346;font-size:10pt}h1{font-size:20pt;color:#18324f}h2{font-size:11pt;color:#18324f;border-bottom:1px solid #ccd6e0;padding-bottom:5px}td{font-family:Arial;font-size:10pt}</style></head><body>' + body + '</body></html>';
     }
     function setNavigation(open) {
@@ -627,6 +690,7 @@
     });
     window.matchMedia('(min-width: 1181px)').addEventListener('change', () => setNavigation(false));
     $('includeAppendix').addEventListener('change', () => { includeAppendix = $('includeAppendix').checked; render(); save(); });
+    $('reportDate').addEventListener('click', () => { try { $('reportDate').showPicker(); } catch (error) { /* Native input remains available on unsupported browsers. */ } });
     $('addPageButton').addEventListener('click', () => { if (busy) return; additionalPages++; render(); save(); const page = $('appendixPages').lastElementChild; page.scrollIntoView({ behavior: 'smooth', block: 'start' }); page.querySelector('.image-area').focus({ preventScroll: true }); });
     $('removePageButton').addEventListener('click', () => { if (busy || additionalPages <= 1) return; const start = 2 + (additionalPages - 1) * 2; if (images.slice(start).some(Boolean) && !confirm('Remove the last page and its attached images?')) return; images = images.slice(0, start); additionalPages--; render(); save(); });
     fieldIds.forEach(id => $(id).addEventListener('input', () => { syncPrint(); scheduleSave(); if (id === 'reportDate') document.querySelectorAll('.appendix .subtitle').forEach(p => p.textContent = 'Supporting material · ' + formattedDate($('reportDate').value)); }));
