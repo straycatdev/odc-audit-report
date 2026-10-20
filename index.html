@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ODC | PAM Internal Audit Tool</title>
   <style>
-    :root { color-scheme: light; --ink: #18324f; --muted: #586b7e; --line: #ccd6e0; --accent: #215b83; }
+    :root { color-scheme: light; --ink: #18324f; --muted: #586b7e; --line: #ccd6e0; --accent: #215b83; --surface: #fff; --canvas: #f3f5f9; --nav: #101f35; --radius: 10px; --brand: #2856cf; }
     * { box-sizing: border-box; }
     body { margin: 0; background: #edf1f5; color: #213346; font: 14px/1.5 Arial, Calibri, sans-serif; }
     button, input, select, textarea { font: inherit; }
@@ -13,14 +13,9 @@
     button { border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; background: #fff; color: var(--ink); font-weight: 600; }
     button:hover { background: #edf4fa; }
     button.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
-    button:disabled { cursor: wait; opacity: .6; }
+    button:disabled { cursor: not-allowed; opacity: .6; }
     :focus-visible { outline: 3px solid #5297c7; outline-offset: 2px; }
-    .app-header { background: #fff; border-bottom: 1px solid var(--line); padding: 20px max(20px, calc((100% - 1056px) / 2)); }
-    .brand { margin: 0; color: var(--ink); font-size: 19px; font-weight: 700; }
-    .app-header p { margin: 4px 0 0; color: var(--muted); }
-    .controls { max-width: 1056px; margin: 20px auto; padding: 18px 22px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
     .actions, .options { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-    .options { margin-top: 16px; padding-top: 14px; border-top: 1px solid #e5ebf0; justify-content: space-between; }
     .check { display: flex; align-items: center; gap: 8px; }
     .check input { width: 17px; height: 17px; accent-color: var(--accent); }
     #status { margin: 8px 0 0; font-size: 12px; }
@@ -64,14 +59,113 @@
     #remarks { width: 100%; height: 94px; resize: none; border: 1px solid var(--line); border-radius: 4px; padding: 9px 11px; line-height: 1.45; color: #213346; font-size: 12px; }
     footer { display: flex; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 9px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; }
     .print-value { display: none; }
-    @media screen and (max-width: 850px) {
-      .controls { margin: 12px; padding: 16px; }
-      .workspace { overflow-x: auto; padding: 0 12px 24px; }
-      .page { margin: 16px auto; }
+    /* Application shell: separate from the fixed-size printable document. */
+    .icon { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .icon-definitions { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .skip-link { position: fixed; top: -80px; left: 16px; z-index: 20; padding: 10px 16px; background: #fff; color: var(--ink); border-radius: 6px; }
+    .skip-link:focus { top: 12px; }
+    .app-shell { display: grid; grid-template-columns: 224px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: 30px 18px 20px; background: var(--nav); color: #d7e0ef; display: flex; flex-direction: column; }
+    .brand-lockup { display: flex; align-items: center; gap: 11px; padding: 0 10px 30px; }
+    .brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #375fce; color: #fff; }
+    .brand-mark .icon { width: 22px; height: 22px; }
+    .brand-name { display: block; color: #fff; font-size: 17px; font-weight: 700; letter-spacing: .2px; }
+    .brand-subtitle { color: #a7b6cc; font-size: 11px; }
+    .nav-label { margin: 18px 12px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1.6px; color: #9cacc4; text-transform: uppercase; }
+    .nav-link { display: flex; align-items: center; gap: 11px; padding: 11px 12px; margin: 3px 0; border-radius: 7px; color: #c3cfe0; text-decoration: none; font-size: 13px; }
+    .nav-link:hover { background: #ffffff0d; color: #fff; }
+    .nav-link.current { background: #294574; color: #fff; box-shadow: inset 3px 0 #80a4ff; }
+    .sidebar-foot { margin-top: auto; padding: 18px 10px 0; border-top: 1px solid #ffffff1a; color: #a7b6cc; font-size: 11px; }
+    .sidebar-foot strong { display: block; color: #e1e8f4; margin-bottom: 3px; font-size: 12px; }
+    .app-main { min-width: 0; background: var(--canvas); }
+    .app-header { min-height: 70px; padding: 16px 32px; border-bottom: 1px solid #e0e6ef; background: #fff; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: #64748b; font-size: 12px; }
+    .breadcrumb strong { color: #263a54; font-weight: 600; }
+    .environment-badge { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #dde5ef; border-radius: 20px; padding: 5px 10px; color: #52647d; font-size: 11px; white-space: nowrap; }
+    .dashboard { max-width: 1340px; margin: 0 auto; padding: 30px 32px 0; }
+    .title-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+    .dashboard-kicker { margin: 0 0 5px; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+    .dashboard-title { margin: 0; color: #162943; font-size: 27px; line-height: 1.3; font-weight: 650; letter-spacing: -.7px; }
+    .title-row .document-type { color: #64748b; font-size: 12px; }
+    .overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+    .stat-card { display: flex; gap: 13px; align-items: center; background: #fff; border: 1px solid #e0e6ef; border-radius: var(--radius); padding: 17px 20px; }
+    .stat-icon { display: grid; place-items: center; width: 38px; height: 38px; background: #eef3ff; color: #3e61b9; border-radius: 9px; flex: none; }
+    .stat-label { display: block; color: #64748b; font-size: 11px; }
+    .stat-value { display: block; color: #20334d; font-size: 20px; font-weight: 650; line-height: 1.4; }
+    .stat-value.format { font-size: 15px; }
+    .controls { background: #fff; border: 1px solid #e0e6ef; border-radius: var(--radius); margin: 0; padding: 0; box-shadow: 0 2px 4px #172c4903; scroll-margin-top: 20px; }
+    .toolbar-main { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px 20px; }
+    .toolbar-main .actions { gap: 8px; }
+    .control-label { color: #33465e; font-size: 12px; font-weight: 650; }
+    .control-label small { display: block; color: #64748b; font-size: 11px; font-weight: 400; margin-top: 2px; }
+    .controls button, .title-row button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 8px 12px; border: 1px solid #d7dfea; border-radius: 6px; background: #fff; color: #33465e; font-family: inherit; font-size: 12px; line-height: 18px; font-weight: 600; white-space: nowrap; transition: background .15s, border-color .15s, box-shadow .15s; box-shadow: 0 1px 2px #172c4908; }
+    .controls button:hover, .title-row button:hover { background: #f7f9fc; border-color: #afbdd0; }
+    .controls button.primary { color: #fff; background: var(--brand); border-color: var(--brand); }
+    .controls button.primary:hover { background: #2149b3; border-color: #2149b3; }
+    .controls button.subtle { box-shadow: none; background: transparent; border-color: transparent; color: #65758a; }
+    .controls button.subtle:hover { color: #a33142; background: #fff4f5; border-color: #f3d8dd; }
+    .options { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0; padding: 13px 20px; border-top: 1px solid #e8edf4; background: #fbfcfe; border-radius: 0 0 var(--radius) var(--radius); }
+    .check { font-size: 12px; color: #40536d; cursor: pointer; gap: 9px; }
+    .check input { margin: 0; accent-color: var(--brand); }
+    .options .section-note { font-size: 11px; color: #64748b; }
+    #status.warning, #overflowWarning { margin: 12px 20px; padding: 10px 12px; border: 1px solid #edd6b9; border-radius: 6px; background: #fffbf2; color: #83480f; font-size: 12px; }
+    .preview-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 25px 0 0; }
+    .preview-heading h2 { margin: 0; color: #33465e; font-size: 13px; font-weight: 650; }
+    .preview-heading span { color: #64748b; font-size: 11px; }
+    #report, #reportDetails, #primaryArtefacts, .remarks-section { scroll-margin-top: 20px; }
+    @media screen {
+      body { font-family: "Segoe UI", Arial, sans-serif; }
+      .workspace { padding: 0 24px 40px; overflow-x: auto; }
+      .page { margin: 22px auto 30px; box-shadow: 0 2px 6px #18324f0a, 0 12px 35px #18324f0c; font-family: Arial, Calibri, sans-serif; }
+      .page button { display: inline-flex; align-items: center; justify-content: center; border-color: #d7dfea; border-radius: 5px; color: #425872; font-weight: 600; box-shadow: none; }
+      .date-row button { min-height: 28px; background: #f4f7fb; font-size: 10px; }
+      .image-area { background: #fbfcfe; }
+      .image-area.active { outline-color: #6383d8; background: #f5f8ff; }
+      .page .empty-image { flex-direction: column; gap: 6px; background: transparent; font-weight: 400; color: #65758a; font-size: 11px; line-height: 1.5; }
+      .page .empty-image:hover { background: #f1f5fc; }
+      .empty-image strong { font-size: 12px; color: #405571; margin: 0; font-weight: 600; }
+      .paste-symbol { width: 28px; height: 28px; color: #7488aa; margin-bottom: 2px; }
+      .paste-shortcut { font-size: 10px; border: 1px solid #d9e1ed; border-bottom-width: 2px; border-radius: 4px; padding: 2px 7px; background: #fff; color: #566985; }
+      .image-tools { top: 8px; right: 8px; padding: 3px; border: 1px solid #e0e6ef; border-radius: 6px; background: #fff; box-shadow: 0 2px 5px #172c4910; gap: 2px; }
+      .image-tools button { min-height: 26px; padding: 3px 8px; border-color: transparent; font-size: 10px; background: transparent; }
+      .image-tools button:hover { background: #eef3fb; }
+      .image-tools button:last-child:hover { background: #fff0f2; color: #a33142; }
+      figcaption { background: #fff; padding: 6px 10px; }
+      .artefact-number { font-size: 10px; color: #65758a; }
+      .field input:focus, .field select:focus, #remarks:focus { border-color: #809bd8; outline: 2px solid #dce6ff; outline-offset: 0; }
     }
+    @media screen and (max-width: 1180px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+    @media screen and (max-width: 650px) {
+      .app-header { min-height: 58px; padding: 14px 18px; }
+      .breadcrumb { font-size: 11px; gap: 6px; }
+      .environment-badge { display: none; }
+      .dashboard { padding: 22px 16px 0; }
+      .dashboard-title { font-size: 23px; }
+      .title-row { align-items: flex-start; margin-bottom: 18px; }
+      .title-row .document-type { display: none; }
+      .overview { gap: 8px; margin-bottom: 16px; }
+      .stat-card { padding: 12px 10px; gap: 0; }
+      .stat-icon { display: none; }
+      .stat-value { font-size: 18px; }
+      .stat-value.format { font-size: 12px; }
+      .stat-label { font-size: 10px; }
+      .toolbar-main { padding: 14px; gap: 14px; }
+      .toolbar-main > .actions { width: 100%; }
+      .toolbar-main > .actions button:not(.subtle) { flex: 1; }
+      .control-label small { display: none; }
+      .options { padding: 13px 14px; gap: 12px; }
+      #pageControls { width: 100%; }
+      .preview-heading span { display: none; }
+      .workspace { padding: 0 16px 24px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
     @page { size: Letter; margin: .48in .55in; }
     @media print {
       body { background: #fff; }
+      .app-shell, .app-main { display: block; min-height: 0; background: #fff; }
       .no-print, .image-tools, .empty-image { display: none !important; }
       .workspace { padding: 0; }
       .page { width: 100%; height: 10.02in; margin: 0; padding: 0; box-shadow: none; }
@@ -87,31 +181,65 @@
   </style>
 </head>
 <body>
-  <header class="app-header no-print">
-    <p class="brand">ODC · PAM Internal Audit Tool</p>
-  </header>
-  <section class="controls no-print" aria-label="Report controls">
-    <div class="actions">
-      <button class="primary" id="printButton" type="button">Save PDF / Print</button>
-      <button id="wordButton" type="button">Download Word (.doc)</button>
-      <button id="clearButton" type="button">Clear images</button>
-      <button id="newButton" type="button">New report</button>
+  <svg class="icon-definitions" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8zM14 3v5h5M8 12h8M8 16h6"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-6 5 7"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L21 7l-5-5L4 14z"/></symbol>
+  </defs></svg>
+  <a class="skip-link no-print" href="#report">Skip to report</a>
+  <div class="app-shell">
+    <aside class="sidebar no-print" aria-label="Workspace navigation">
+      <div class="brand-lockup"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><div><span class="brand-name">ODC Managed</span><span class="brand-subtitle">Audit workspace</span></div></div>
+      <p class="nav-label">Workspace</p>
+      <nav aria-label="Audit tools"><a class="nav-link current" href="#report" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>PAM report generator</a></nav>
+      <p class="nav-label">This report</p>
+      <nav aria-label="Report sections">
+        <a class="nav-link" href="#reportDetails"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>Report details</a>
+        <a class="nav-link" href="#primaryArtefacts"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>PAM artefacts</a>
+        <a class="nav-link" href="#exportControls"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export document</a>
+      </nav>
+      <div class="sidebar-foot"><strong>Internal audit</strong>Privileged Access Management</div>
+    </aside>
+    <div class="app-main">
+      <header class="app-header no-print"><div class="breadcrumb"><span>ODC Workspace</span><span aria-hidden="true">/</span><span>Internal audit</span><span aria-hidden="true">/</span><strong>PAM report</strong></div><span class="environment-badge"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>Internal use</span></header>
+      <div class="dashboard no-print">
+        <div class="title-row"><div><p class="dashboard-kicker">Document workspace</p><h2 class="dashboard-title">PAM report generator</h2></div><button id="newButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>New report</button></div>
+        <section class="overview" aria-label="Report overview">
+          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><div><span class="stat-label">Pages in export</span><span class="stat-value" id="pageCount">1</span></div></div>
+          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg></span><div><span class="stat-label">Artefacts in export</span><span class="stat-value" id="artefactCount">0</span></div></div>
+          <div class="stat-card"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><div><span class="stat-label">Document format</span><span class="stat-value format">US Letter</span></div></div>
+        </section>
+  <section class="controls no-print" id="exportControls" aria-label="Report controls">
+    <div class="toolbar-main">
+      <div class="control-label">Document actions<small>Export the selected report pages</small></div>
+      <div class="actions">
+        <button id="clearButton" class="subtle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>Clear images</button>
+        <button id="wordButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>Word (.doc)</button>
+        <button class="primary" id="printButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Save PDF / Print</button>
+      </div>
     </div>
     <div class="options">
       <label class="check"><input id="includeAppendix" type="checkbox"> Multiple artefacts (3+)</label>
-      <div id="pageControls" class="actions" hidden><button id="addPageButton" type="button">Add page</button><button id="removePageButton" type="button">Remove last page</button></div>
+      <div id="pageControls" class="actions" hidden><button id="addPageButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Add page</button><button id="removePageButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg>Remove last page</button></div>
       <span id="pageSummary" class="section-note"></span>
     </div>
     <p id="status" role="status" aria-live="polite" hidden></p>
     <p id="overflowWarning" role="alert" hidden>Remarks exceed the available space. Shorten them before exporting.</p>
   </section>
+        <div class="preview-heading"><h2>Document preview</h2><span>8.5 × 11 in · Two artefacts per page · Click fields to edit</span></div>
+      </div>
   <main class="workspace" id="report" aria-label="Report preview">
     <article class="page" id="firstPage" aria-label="Report page 1">
       <header class="report-header">
         <div><p class="eyebrow">ODC Managed</p><h1>PAM Summary Report</h1><p class="subtitle">Privileged Access Management</p></div>
         <div class="classification">Internal audit<br>Confidential</div>
       </header>
-      <section class="metadata" aria-label="Report details">
+      <section class="metadata" id="reportDetails" aria-label="Report details">
         <div class="field"><label class="field-label" for="user">User name</label><input id="user" autocomplete="off" placeholder="Full name" maxlength="120"><span class="print-value" data-for="user"></span></div>
         <div class="field"><label class="field-label" for="username">PAM username</label><input id="username" autocomplete="off" placeholder="Account username" maxlength="120"><span class="print-value" data-for="username"></span></div>
         <div class="field">
@@ -129,6 +257,8 @@
     </article>
     <div id="appendixPages"></div>
   </main>
+    </div>
+  </div>
   <script>
     'use strict';
     const KEY = 'odcPamAuditDraft.v2';
@@ -230,7 +360,10 @@
       } else {
         const button = makeButton('', 'Paste screenshot into artefact ' + (index + 1), () => { activate(index); area.focus(); }); button.className = 'empty-image no-print';
         const title = document.createElement('strong'); title.textContent = 'Paste PAM artefact';
-        button.append(title, document.createTextNode('Click here, then press Ctrl+V to paste your snip.')); area.append(button);
+        const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); icon.setAttribute('class', 'icon paste-symbol'); icon.setAttribute('aria-hidden', 'true');
+        const use = document.createElementNS('http://www.w3.org/2000/svg', 'use'); use.setAttribute('href', '#i-image'); icon.append(use);
+        const shortcut = document.createElement('span'); shortcut.className = 'paste-shortcut'; shortcut.textContent = 'Ctrl + V';
+        button.append(icon, title, document.createTextNode('Select this area and paste your screenshot'), shortcut); area.append(button);
       }
       const caption = document.createElement('figcaption');
       const number = document.createElement('span'); number.className = 'artefact-number'; number.textContent = 'Artefact ' + (index + 1);
@@ -263,7 +396,11 @@
         const pageNumber = document.createElement('span'); pageNumber.textContent = 'Page ' + (pageIndex + 2) + ' of ' + total;
         footer.append(brand, pageNumber); page.append(header, grid, footer); $('appendixPages').append(page);
       }
-      $('pageSummary').textContent = total + (total === 1 ? ' page' : ' pages') + ' selected · ' + images.filter(Boolean).length + ' artefacts attached' + (!includeAppendix && images.length > 2 ? ' · ' + (images.length - 2) + ' excluded from export' : '');
+      const exportedArtefacts = images.slice(0, total * 2).filter(Boolean).length;
+      const excludedArtefacts = images.slice(total * 2).filter(Boolean).length;
+      $('pageCount').textContent = total;
+      $('artefactCount').textContent = exportedArtefacts;
+      $('pageSummary').textContent = 'Two artefacts per page' + (excludedArtefacts ? ' · ' + excludedArtefacts + ' saved outside export' : '');
       targetSlot = null;
       syncPrint();
     }
