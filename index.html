@@ -93,10 +93,6 @@
     .nav-link { display: flex; align-items: center; gap: 11px; padding: 11px 12px; margin: 3px 0; border-radius: 7px; color: #c3cfe0; text-decoration: none; font-size: 13px; }
     .nav-link:hover { background: #ffffff0d; color: #fff; }
     .nav-link.current { background: #294574; color: #fff; box-shadow: inset 3px 0 #80a4ff; }
-    .upcoming-link { display: block; margin: 10px 12px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #c3cfe0; font-size: 12px; font-weight: 400; text-align: left; }
-    .upcoming-link:hover { background: transparent; color: #fff; }
-    .upcoming-link span { margin-left: 8px; color: #9cacc4; font-size: 10px; }
-    .upcoming-note { margin: 8px 12px; color: #b8c7db; font-size: 11px; }
     .sidebar { overflow-y: auto; }
     .page-nav { max-height: 210px; overflow-y: auto; margin: 0 6px 18px; }
     .page-nav a { display: flex; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 6px; color: #c3cfe0; text-decoration: none; font-size: 12px; }
@@ -247,7 +243,7 @@
       .paste-symbol { width: 20px; height: 20px; margin: 0; }
     }
     @media (pointer: coarse) {
-      .nav-link, .upcoming-link { min-height: 44px; }
+      .nav-link { min-height: 44px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
     @page { size: Letter; margin: .48in .35in; }
@@ -267,6 +263,27 @@
       figcaption .print-value { font-size: 11px; }
       .image-area { background: #fff; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    /* Restrained workspace styling; native date input retains platform accessibility. */
+    .date-card { min-width: 0; width: 100%; }
+    .date-card input { display: block; width: 100%; max-width: 190px; min-width: 0; margin-top: 5px; padding: 6px 9px; border: 1px solid #dbe3ee; border-radius: 7px; background: #f8fafd; color: #20334d; font: 600 13px/1.4 "Segoe UI", Arial, sans-serif; accent-color: var(--brand); }
+    .date-card input:hover { border-color: #aabbd5; background: #fff; }
+    .date-card input:focus-visible { outline: 3px solid #dce6ff; outline-offset: 1px; border-color: #6383d8; }
+    .report-date-value { margin-top: 5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
+    .metadata { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .metadata .field:last-child { grid-column: span 2; }
+    .metadata .field { border-right: 0; border-bottom: 1px solid var(--line); }
+    .metadata .field:not(:nth-child(3)):not(:last-child) { border-right: 1px solid var(--line); }
+    .metadata .field:nth-child(4) { border-bottom: 0; }
+    .metadata .field:last-child { border-bottom: 0; }
+    @media screen and (max-width: 650px) {
+      .date-card input { min-height: 44px; font-size: 16px; width: 165px; margin-top: 0; }
+    }
+    @media screen and (max-width: 540px) {
+      .metadata { grid-template-columns: 1fr; }
+      .metadata .field:last-child { grid-column: auto; }
+      .metadata .field:not(:last-child) { border-right: 0; border-bottom: 1px solid var(--line); }
     }
   </style>
 </head>
@@ -288,10 +305,6 @@
       <div class="brand-lockup"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><div><span class="brand-name">ODC Managed</span><span class="brand-subtitle">Audit workspace</span></div></div>
       <p class="nav-label">Workspace</p>
       <nav aria-label="Audit tools"><a class="nav-link current" href="#report" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>PAM Report Generator</a></nav>
-      <button class="upcoming-link" type="button" aria-expanded="false" aria-controls="laboratoryNote">Laboratory Team Folder <span>Soon</span></button>
-      <p class="upcoming-note" id="laboratoryNote" role="status" hidden>Laboratory Team Folder is coming soon. No folder is connected.</p>
-      <button class="upcoming-link" type="button" aria-expanded="false" aria-controls="radiologyNote">Radiology Team Folder <span>Soon</span></button>
-      <p class="upcoming-note" id="radiologyNote" role="status" hidden>Radiology Team Folder is coming soon. No folder is connected.</p>
       <p class="nav-label">This report</p>
       <nav aria-label="Report sections">
         <a class="nav-link" href="#reportDetails"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>Report Details</a>
@@ -337,12 +350,11 @@
         <div class="classification">Internal audit<br>Confidential<div class="report-date-value" id="reportDateSummary"></div></div>
       </header>
       <section class="metadata" id="reportDetails" aria-label="Report details">
-        <div class="field"><label class="field-label" for="user">User</label><input id="user" autocomplete="off" placeholder="e.g. Zexjohndoe" maxlength="120"><span class="print-value" data-for="user"></span></div>
+        <div class="field"><label class="field-label" for="user">User</label><input id="user" autocomplete="off" placeholder="zexjohndoe" maxlength="120"><span class="print-value" data-for="user"></span></div>
         <div class="field"><label class="field-label" for="username">Account Username</label><input id="username" autocomplete="off" placeholder="e.g. pamadm" maxlength="120"><span class="print-value" data-for="username"></span></div>
-        <div class="field"><label class="field-label" for="shift">Shift</label><select id="shift"><option>Morning</option><option>Mid</option><option>Night</option></select><span class="print-value" data-for="shift"></span></div>
-        <div class="field"><label class="field-label" for="ip">User IP</label><input id="ip" autocomplete="off" placeholder="e.g. 10.5.5.31" maxlength="80"><span class="print-value" data-for="ip"></span></div>
-        <div class="field"><label class="field-label" for="accountAddress">Account Address</label><input id="accountAddress" autocomplete="off" placeholder="e.g. B 10.5.3.21" maxlength="120"><span class="print-value" data-for="accountAddress"></span></div>
-        <div class="field"><span class="field-label">Report Date</span><span class="report-date-value" data-for="reportDate"></span></div>
+        <div class="field"><label class="field-label" for="shift">Shift</label><select id="shift"><option value="">Not specified</option><option>Morning</option><option>Mid</option><option>Night</option></select><span class="print-value" data-for="shift"></span></div>
+        <div class="field"><label class="field-label" for="ip">User IP</label><input id="ip" autocomplete="off" placeholder="e.g. 10.0.0.1" maxlength="80"><span class="print-value" data-for="ip"></span></div>
+        <div class="field"><label class="field-label" for="accountAddress">Account Address</label><input id="accountAddress" autocomplete="off" placeholder="e.g. 10.255.255.255" maxlength="120"><span class="print-value" data-for="accountAddress"></span></div>
       </section>
       <div class="section-heading"><h2 class="section-title">PAM Artefacts</h2><span class="section-note">Primary supporting material</span></div>
       <section id="primaryArtefacts" class="primary-artefacts" aria-label="Primary PAM artefacts"></section>
@@ -374,10 +386,7 @@
       const d = new Date();
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
-    function defaultShift() {
-      const hour = new Date().getHours();
-      return hour >= 6 && hour < 14 ? 'Morning' : hour >= 14 && hour < 22 ? 'Mid' : 'Night';
-    }
+    function defaultShift() { return ''; }
     function normalizeDate(value) {
       if (typeof value !== 'string') return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
@@ -586,7 +595,7 @@
       };
       const count = includeAppendix ? additionalPages : 0;
       const cell = (label, value) => '<td width="33%" style="border:1px solid #ccd6e0;padding:4px 8px"><b style="color:#586b7e;font-size:7pt">' + label + '</b><br>' + esc(value || 'Not specified') + '</td>';
-      let body = '<h1 style="margin:0;font-size:17pt">PAM Summary Report</h1><p style="margin:3px 0 6px;font-size:8pt">Privileged Access Management</p><table width="100%" style="border-collapse:collapse"><tr>' + cell('User', $('user').value) + cell('Account Username', $('username').value) + cell('Shift', $('shift').value) + '</tr><tr>' + cell('User IP', $('ip').value) + cell('Account Address', $('accountAddress').value) + cell('Report Date', formattedDate($('reportDate').value)) + '</tr></table><h2 style="margin:6px 0 0;font-size:9pt">PAM Artefacts</h2>' + imageHtml(images[0], 0) + imageHtml(images[1], 1) + '<table width="100%" style="border-collapse:collapse"><tr><td width="14%" valign="top" style="font-size:8pt"><b>Audit remarks</b></td><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt">' + esc($('remarks').value.trim() || 'No remarks recorded.').replace(/\n/g, '<br>') + '</td></tr></table>' + footer(1, count + 1);
+      let body = '<h1 style="margin:0;font-size:17pt">PAM Summary Report</h1><p style="margin:3px 0 6px;font-size:8pt">Privileged Access Management · Report date: ' + esc(formattedDate($('reportDate').value)) + '</p><table width="100%" style="border-collapse:collapse"><tr>' + cell('User', $('user').value) + cell('Account Username', $('username').value) + cell('Shift', $('shift').value) + '</tr><tr>' + cell('User IP', $('ip').value) + cell('Account Address', $('accountAddress').value) + '<td width="33%" style="border:1px solid #ccd6e0;padding:4px 8px">&nbsp;</td>' + '</tr></table><h2 style="margin:6px 0 0;font-size:9pt">PAM Artefacts</h2>' + imageHtml(images[0], 0) + imageHtml(images[1], 1) + '<table width="100%" style="border-collapse:collapse"><tr><td width="14%" valign="top" style="font-size:8pt"><b>Audit remarks</b></td><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt">' + esc($('remarks').value.trim() || 'No remarks recorded.').replace(/\n/g, '<br>') + '</td></tr></table>' + footer(1, count + 1);
       for (let p = 0; p < count; p++) {
         body += '<div style="page-break-before:always"><h1>Additional PAM Artefacts</h1><p>PAM Summary Report · ' + esc(formattedDate($('reportDate').value)) + '</p>';
         for (let row = 0; row < 2; row++) { const index = 2 + p * 2 + row; body += imageHtml(images[index], index); }
@@ -617,11 +626,6 @@
       if (event.key === 'Escape' && document.body.classList.contains('nav-open')) { setNavigation(false); $('menuButton').focus(); }
     });
     window.matchMedia('(min-width: 1181px)').addEventListener('change', () => setNavigation(false));
-    document.querySelectorAll('.upcoming-link').forEach(button => button.addEventListener('click', () => {
-      const expanded = button.getAttribute('aria-expanded') !== 'true';
-      button.setAttribute('aria-expanded', String(expanded));
-      $(button.getAttribute('aria-controls')).hidden = !expanded;
-    }));
     $('includeAppendix').addEventListener('change', () => { includeAppendix = $('includeAppendix').checked; render(); save(); });
     $('addPageButton').addEventListener('click', () => { if (busy) return; additionalPages++; render(); save(); const page = $('appendixPages').lastElementChild; page.scrollIntoView({ behavior: 'smooth', block: 'start' }); page.querySelector('.image-area').focus({ preventScroll: true }); });
     $('removePageButton').addEventListener('click', () => { if (busy || additionalPages <= 1) return; const start = 2 + (additionalPages - 1) * 2; if (images.slice(start).some(Boolean) && !confirm('Remove the last page and its attached images?')) return; images = images.slice(0, start); additionalPages--; render(); save(); });
