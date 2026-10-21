@@ -523,7 +523,12 @@
         const start = 2 + pageIndex * 2;
         for (let i = start; i < start + 2; i++) grid.append(createArtefact(i));
         page.tabIndex = 0;
-        page.addEventListener('click', () => { const empty = Array.from({ length: 2 }, (_, k) => start + k).find(i => !images[i]); activate(empty === undefined ? 2 + additionalPages * 2 : empty); page.focus(); });
+        page.addEventListener('click', event => {
+          if (event.target.closest('input, textarea, select, button, a, [contenteditable], .remarks-section')) return;
+          const empty = Array.from({ length: 2 }, (_, k) => start + k).find(i => !images[i]);
+          activate(empty === undefined ? 2 + additionalPages * 2 : empty);
+          page.focus();
+        });
         const footer = document.createElement('footer');
         const brand = document.createElement('span'); brand.textContent = 'ODC Managed - PAM Internal Audit Tool';
         const pageNumber = document.createElement('span'); pageNumber.className = 'page-number'; pageNumber.textContent = 'Page ' + (pageIndex + 2) + ' of ' + total;
@@ -596,7 +601,11 @@
     let remarksChunks = [];
     function paginateRemarks() {
       const last = $('appendixPages').lastElementChild || $('firstPage');
-      last.insertBefore($('remarksSection'), last.querySelector('footer'));
+      // Moving an already-mounted editor can blur it and reset its caret.
+      // Only relocate remarks when the selected last artefact page changes.
+      if ($('remarksSection').parentElement !== last) {
+        last.insertBefore($('remarksSection'), last.querySelector('footer'));
+      }
       const measure = document.createElement('div');
       measure.style.cssText = 'position:fixed;left:-10000px;top:0;width:640px;padding:5px 8px;border:1px solid;box-sizing:border-box;font:12px/1.45 Arial;white-space:pre-wrap;overflow-wrap:anywhere;visibility:hidden;';
       document.body.append(measure);
