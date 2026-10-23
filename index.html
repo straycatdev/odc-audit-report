@@ -93,11 +93,21 @@
     .nav-link { display: flex; align-items: center; gap: 11px; padding: 11px 12px; margin: 3px 0; border-radius: 7px; color: #c3cfe0; text-decoration: none; font-size: 13px; }
     .nav-link:hover { background: #ffffff0d; color: #fff; }
     .nav-link.current { background: #294574; color: #fff; box-shadow: inset 3px 0 #80a4ff; }
-    .sidebar { overflow-y: auto; }
-    .page-nav { max-height: 210px; overflow-y: auto; margin: 0 6px 18px; }
-    .page-nav a { display: flex; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 6px; color: #c3cfe0; text-decoration: none; font-size: 12px; }
-    .page-nav a:hover, .page-nav a[aria-current] { background: #294574; color: #fff; }
-    .page-nav small { color: #a7b6cc; white-space: nowrap; }
+    .sidebar { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #637893 transparent; }
+    .sidebar > * { flex-shrink: 0; }
+    .page-nav { max-height: clamp(150px, 30vh, 320px); overflow-y: auto; overflow-x: hidden; margin: 0 0 20px; padding: 2px 8px 2px 2px; scrollbar-width: thin; scrollbar-color: #637893 transparent; overscroll-behavior-y: contain; scrollbar-gutter: stable; }
+    .sidebar::-webkit-scrollbar, .page-nav::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-track, .page-nav::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb, .page-nav::-webkit-scrollbar-thumb { background: #637893; border: 1px solid var(--nav); border-radius: 12px; }
+    .sidebar::-webkit-scrollbar-thumb:hover, .page-nav::-webkit-scrollbar-thumb:hover { background: #91a6c1; }
+    .page-nav a { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; min-height: 54px; margin: 3px 0; padding: 9px 12px; border: 1px solid transparent; border-radius: 8px; color: #d4deec; text-decoration: none; font-size: 12px; font-weight: 600; line-height: 1.4; transition: background .15s, border-color .15s; }
+    .page-nav a:hover { background: #ffffff0d; border-color: #ffffff14; color: #fff; }
+    .page-nav a[aria-current] { background: #294574; border-color: #476699; color: #fff; box-shadow: inset 3px 0 #91b0ff; }
+    .page-nav a:focus-visible { outline: 2px solid #a9c0ff; outline-offset: -2px; background: #294574; }
+    .page-nav small { color: #a7b6cc; white-space: normal; font-size: 10px; font-weight: 400; }
+    .page-nav-sections { color: #b9c8df; font-size: 10px; font-weight: 400; line-height: 1.6; }
+    .sidebar > .page-nav { flex-shrink: 1; min-height: 100px; max-height: none; flex-grow: 1; margin-bottom: 10px; }
+    @media (forced-colors: active) { .sidebar, .page-nav { scrollbar-color: auto; } }
     .image-preview { width: min(96vw, 1500px); max-width: 96vw; max-height: 94vh; padding: 0; border: 1px solid #ccd6e0; border-radius: 10px; color: var(--ink); }
     .image-preview::backdrop { background: #101f35bf; }
     .preview-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
@@ -307,6 +317,51 @@
       .remarks-section, #firstPage .remarks-section { grid-template-columns: 94px minmax(0, 1fr); }
       .remarks-print { margin: 0; }
     }
+
+    .count-control { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; font-size: 12px; font-weight: 600; color: #40536d; }
+    .count-stepper { display: inline-flex; align-items: center; border: 1px solid #d7dfea; border-radius: 7px; background: #fff; overflow: hidden; }
+    .controls .count-stepper button { width: 36px; min-height: 36px; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+    .count-stepper input { width: 56px; min-height: 36px; padding: 6px 2px; border: 0; border-left: 1px solid #e8edf4; border-right: 1px solid #e8edf4; border-radius: 0; background: #fff; text-align: center; color: var(--ink); font-weight: 600; appearance: textfield; -moz-appearance: textfield; }
+    .count-stepper input::-webkit-inner-spin-button, .count-stepper input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+    .layout-summary { color: #64748b; font-size: 11px; font-weight: 400; }
+    .artefact-help { position: relative; margin-left: auto; }
+    .artefact-help summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; padding: 7px 9px; border-radius: 6px; color: #405c89; font-size: 12px; font-weight: 600; }
+    .artefact-help summary::-webkit-details-marker { display: none; }
+    .artefact-help summary:hover, .artefact-help[open] summary { background: #edf3ff; }
+    .help-panel { position: absolute; right: 0; top: calc(100% + 9px); z-index: 10; width: min(370px, calc(100vw - 64px)); padding: 18px 20px; background: #fff; border: 1px solid #dbe3ef; border-radius: 10px; box-shadow: 0 12px 36px #172c4926; color: #40536d; font-size: 12px; line-height: 1.65; }
+    .help-panel h3 { margin: 0 0 10px; color: var(--ink); font-size: 13px; }
+    .help-panel ol { margin: 0; padding-left: 18px; }
+    .help-panel li + li { margin-top: 12px; }
+    .help-panel kbd { padding: 1px 4px; border: 1px solid #dbe3ef; border-radius: 4px; background: #f6f8fc; font: inherit; white-space: nowrap; }
+    @media screen and (max-width: 650px) {
+      .controls .count-stepper button { width: 44px; min-height: 44px; }
+      .artefact-help { margin-left: 0; }
+      .artefact-help summary { min-height: 44px; }
+      .help-panel { left: 0; right: auto; }
+    }
+    .single-artefact .primary-artefacts, .single-artefact .artefact-grid { grid-template-rows: 1fr; height: calc(var(--artefact-height) * 2 + 10px); }
+    .single-artefact .artefact { height: 100%; }
+    /* Split pages share all remaining paper height, including an unpaired final image. */
+    @media print, screen and (min-width: 901px) {
+      .split-artefacts > .report-header,
+      .split-artefacts > .remarks-section,
+      .split-artefacts > footer { flex-shrink: 0; }
+      .split-artefacts > .artefact-grid {
+        flex: 1 1 0;
+        min-height: 0;
+        grid-template-rows: repeat(var(--slot-count), minmax(0, 1fr));
+      }
+      .split-artefacts .artefact { height: auto; min-height: 0; }
+      .split-artefacts .image-area img { position: absolute; inset: 0; }
+    }
+    @media screen and (max-width: 900px) {
+      .split-artefacts > .artefact-grid { grid-template-rows: none; grid-auto-rows: auto; }
+    }
+    @media screen and (max-width: 850px) {
+      .single-artefact .primary-artefacts, .single-artefact .artefact-grid { height: auto; }
+      .single-artefact .artefact { height: auto; min-height: 420px; }
+      .count-control input { min-height: 44px; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -324,17 +379,11 @@
   <div class="app-shell">
     <button class="nav-backdrop no-print" id="navBackdrop" type="button" aria-label="Close navigation" tabindex="-1"></button>
     <aside class="sidebar no-print" id="workspaceNav" aria-label="Workspace navigation">
-      <div class="brand-lockup"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><div><span class="brand-name">ODC Managed</span><span class="brand-subtitle">Audit workspace</span></div></div>
+      <div class="brand-lockup"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><div><span class="brand-name">PAM Audit</span><span class="brand-subtitle">Audit workspace</span></div></div>
       <p class="nav-label">Workspace</p>
       <nav aria-label="Audit tools"><a class="nav-link current" href="#report" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>PAM Report Generator</a></nav>
       <p class="nav-label">This report</p>
-      <nav aria-label="Report sections">
-        <a class="nav-link" href="#reportDetails"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>Report Details</a>
-        <a class="nav-link" href="#primaryArtefacts"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>PAM Artefacts</a>
-        <a class="nav-link" href="#exportControls"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export Document</a>
-      </nav>
-      <p class="nav-label">Report pages</p>
-      <nav id="pageNavigation" class="page-nav" aria-label="Report pages"></nav>
+      <nav id="pageNavigation" class="page-nav" aria-label="This report pages"></nav>
       <div class="sidebar-foot"><strong>Internal audit</strong>Privileged Access Management</div>
     </aside>
     <div class="app-main">
@@ -348,27 +397,43 @@
         </section>
   <section class="controls no-print" id="exportControls" aria-label="Report controls">
     <div class="toolbar-main">
-      <div class="control-label">Document Actions<small>Export the selected report pages</small></div>
+      <div class="control-label">Document Actions</div>
       <div class="actions">
         <button id="clearButton" class="subtle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>Clear Images</button>
-        <button id="wordButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>Word (.doc)</button>
-        <button class="primary" id="printButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Save PDF / Print</button>
+        <button class="primary" id="printButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Download PDF</button>
       </div>
     </div>
     <div class="options">
-      <label class="check"><input id="includeAppendix" type="checkbox"> Multiple artefacts (3+)</label>
-      <div id="pageControls" class="actions" hidden><button id="addPageButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Add page</button><button id="removePageButton" type="button"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg>Remove last page</button></div>
+      <div class="count-control">
+        <label for="artefactTotal">Number of artefacts</label>
+        <div class="count-stepper">
+          <button id="decreaseArtefacts" type="button" aria-label="Decrease artefact count"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button>
+          <input id="artefactTotal" type="number" min="1" max="100" step="1" value="2" aria-describedby="layoutSummary">
+          <button id="increaseArtefacts" type="button" aria-label="Increase artefact count"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        </div>
+        <span id="layoutSummary" class="layout-summary" role="status" aria-live="polite"></span>
+      </div>
+      <details class="artefact-help" id="artefactHelp">
+        <summary><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 .5c0 2-2.5 2-2.5 4M12 17h.01"/></svg>How to add artefacts</summary>
+        <div class="help-panel">
+          <h3>Adding your artefacts</h3>
+          <ol>
+            <li>Extract your artefacts in Clean Room and save the images in your approved Teams, OneDrive, or other authorized storage.</li>
+            <li>In Teams, open the image and wait until it is fully loaded and clear. Select <strong>Copy Image</strong>, click an artefact space in the report, then press <kbd>Ctrl + V</kbd> (or <kbd>⌘ + V</kbd> on Mac).</li>
+          </ol>
+        </div>
+      </details>
       <span id="pageSummary" class="section-note"></span>
     </div>
     <p id="status" role="status" aria-live="polite" hidden></p>
     <p id="overflowWarning" role="alert" hidden>Remarks exceed the available space. Shorten them before exporting.</p>
   </section>
-        <div class="preview-heading"><h2>Document Preview</h2><span>8.5 × 11 in · Two artefacts per page · Click fields to edit</span></div>
+        <div class="preview-heading"><h2>Document Preview</h2></div>
       </div>
   <main class="workspace" id="report" aria-label="Report preview">
     <article class="page" id="firstPage" aria-label="Report page 1">
       <header class="report-header">
-        <div><p class="eyebrow">ODC Managed</p><h1>PAM Summary Report</h1><p class="subtitle">Privileged Access Management</p></div>
+        <div><h1>PAM Summary Report</h1><p class="subtitle">Privileged Access Management</p></div>
         <div class="classification">Internal audit<br>Confidential<div class="report-date-value" id="reportDateSummary"></div></div>
       </header>
       <section class="metadata" id="reportDetails" aria-label="Report details">
@@ -378,10 +443,10 @@
         <div class="field"><label class="field-label" for="ip">User IP</label><input id="ip" autocomplete="off" placeholder="e.g. 10.0.0.1" maxlength="80"><span class="print-value" data-for="ip"></span></div>
         <div class="field"><label class="field-label" for="accountAddress">Account Address</label><input id="accountAddress" autocomplete="off" placeholder="e.g. 10.255.255.255" maxlength="120"><span class="print-value" data-for="accountAddress"></span></div>
       </section>
-      <div class="section-heading"><h2 class="section-title">PAM Artefacts</h2><span class="section-note">Primary supporting material</span></div>
+      <div class="section-heading"><h2 class="section-title">PAM Artefacts</h2></div>
       <section id="primaryArtefacts" class="primary-artefacts" aria-label="Primary PAM artefacts"></section>
-      <section class="remarks-section" id="remarksSection"><label class="section-title" for="remarks">Audit remarks</label><textarea id="remarks" placeholder="Record observations, exceptions, and required follow-up actions." aria-describedby="remarksHint"></textarea><small id="remarksHint" class="no-print">Long remarks continue automatically on additional report pages.</small><div id="remarksPrint" class="print-value remarks-print"></div></section>
-      <footer><span>ODC Managed - PAM Internal Audit Tool</span><span class="page-number"></span></footer>
+      <section class="remarks-section" id="remarksSection"><label class="section-title" for="remarks">Audit remarks</label><textarea id="remarks" placeholder="Record observations, exceptions, and required follow-up actions."></textarea><div id="remarksPrint" class="print-value remarks-print"></div></section>
+      <footer><span>PAM Internal Audit Tool</span><span class="page-number"></span></footer>
     </article>
     <div id="appendixPages"></div>
     <div id="remarksPages"></div>
@@ -399,6 +464,7 @@
     const $ = id => document.getElementById(id);
     const fieldIds = ['user', 'username', 'ip', 'accountAddress', 'reportDate', 'shift', 'remarks'];
     let images = [null, null];
+    let artefactTotal = 2;
     let includeAppendix = false;
     let additionalPages = 1;
     let targetSlot = null;
@@ -431,7 +497,7 @@
       $('status').classList.toggle('warning', warning);
     }
     function draft() {
-      return { fields: Object.fromEntries(fieldIds.map(id => [id, $(id).value])), images, includeAppendix, additionalPages };
+      return { fields: Object.fromEntries(fieldIds.map(id => [id, $(id).value])), images, artefactTotal, includeAppendix, additionalPages };
     }
     function save() {
       clearTimeout(saveTimer);
@@ -459,6 +525,7 @@
           if (Array.isArray(data.images)) images = [imageRecord(data.images[0]), imageRecord(data.images[1]), ...data.images.slice(2).map(imageRecord)];
           includeAppendix = typeof data.includeAppendix === 'boolean' ? data.includeAppendix : images.length > 2;
           additionalPages = Math.max(1, Math.ceil((images.length - 2) / 2), Number.isSafeInteger(data.additionalPages) && data.additionalPages > 0 ? data.additionalPages : 1);
+          artefactTotal = Number.isInteger(data.artefactTotal) && data.artefactTotal >= 1 && data.artefactTotal <= 100 ? data.artefactTotal : (includeAppendix ? Math.min(100, 2 + additionalPages * 2) : 2);
           setStatus(current ? 'Saved draft restored.' : 'Previous report draft restored.');
         } else setStatus('Ready. Your draft will be saved in this browser.');
       } catch (error) { setStatus('The saved draft could not be read. A new report is ready.', true); }
@@ -495,17 +562,26 @@
         const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); icon.setAttribute('class', 'icon paste-symbol'); icon.setAttribute('aria-hidden', 'true');
         const use = document.createElementNS('http://www.w3.org/2000/svg', 'use'); use.setAttribute('href', '#i-image'); icon.append(use);
         const shortcut = document.createElement('span'); shortcut.className = 'paste-shortcut'; shortcut.textContent = 'Ctrl + V';
-        button.append(icon, title, document.createTextNode('Select this area and paste your screenshot'), shortcut); area.append(button);
+        button.append(icon, title); area.append(button);
       }
       const caption = document.createElement('figcaption');
       const number = document.createElement('span'); number.className = 'artefact-number'; number.textContent = 'Artefact ' + (index + 1);
       caption.append(number); figure.append(area, caption); return figure;
     }
     function render() {
-      $('includeAppendix').checked = includeAppendix;
-      $('pageControls').hidden = !includeAppendix;
-      $('removePageButton').hidden = additionalPages <= 1;
-      $('primaryArtefacts').replaceChildren(createArtefact(0), createArtefact(1));
+      const pageSlots = [];
+      for (let index = 0; index < Math.min(3, artefactTotal); index++) pageSlots.push([index]);
+      for (let index = 3; index < artefactTotal; index += 2) {
+        pageSlots.push(Array.from({ length: Math.min(2, artefactTotal - index) }, (_, offset) => index + offset));
+      }
+      additionalPages = pageSlots.length - 1;
+      includeAppendix = additionalPages > 0;
+      $('artefactTotal').value = artefactTotal;
+      $('decreaseArtefacts').disabled = artefactTotal <= 1;
+      $('increaseArtefacts').disabled = artefactTotal >= 100;
+      $('layoutSummary').textContent = pageSlots.length + (additionalPages ? ' pages' : ' page');
+      $('firstPage').classList.add('single-artefact');
+      $('primaryArtefacts').replaceChildren(createArtefact(0));
       $('firstPage').insertBefore($('remarksSection'), $('firstPage').querySelector('footer'));
       $('appendixPages').replaceChildren();
       const appendixCount = includeAppendix ? additionalPages : 0;
@@ -513,6 +589,10 @@
       $('firstPage').querySelector('.page-number').textContent = 'Page 1 of ' + total;
       for (let pageIndex = 0; pageIndex < appendixCount; pageIndex++) {
         const page = document.createElement('article'); page.className = 'page appendix'; page.id = 'reportPage' + (pageIndex + 2); page.setAttribute('aria-label', 'Report page ' + (pageIndex + 2));
+        const slots = pageSlots[pageIndex + 1];
+        page.classList.toggle('single-artefact', pageIndex < 2);
+        page.classList.toggle('split-artefacts', pageIndex >= 2);
+        page.style.setProperty('--slot-count', slots.length);
         const header = document.createElement('header'); header.className = 'report-header';
         const titles = document.createElement('div');
         const eyebrow = document.createElement('p'); eyebrow.className = 'eyebrow'; eyebrow.textContent = 'PAM Summary Report';
@@ -520,38 +600,31 @@
         const subtitle = document.createElement('p'); subtitle.className = 'subtitle'; subtitle.textContent = 'Supporting material · ' + formattedDate($('reportDate').value);
         titles.append(eyebrow, heading, subtitle); header.append(titles);
         const grid = document.createElement('section'); grid.className = 'artefact-grid'; grid.setAttribute('aria-label', 'Additional artefacts');
-        const start = 2 + pageIndex * 2;
-        for (let i = start; i < start + 2; i++) grid.append(createArtefact(i));
+        const start = slots[0];
+        slots.forEach(index => grid.append(createArtefact(index)));
         page.tabIndex = 0;
         page.addEventListener('click', event => {
           if (event.target.closest('input, textarea, select, button, a, [contenteditable], .remarks-section')) return;
-          const empty = Array.from({ length: 2 }, (_, k) => start + k).find(i => !images[i]);
-          activate(empty === undefined ? 2 + additionalPages * 2 : empty);
+          const empty = slots.find(index => !images[index]);
+          activate(empty === undefined ? start : empty);
           page.focus();
         });
         const footer = document.createElement('footer');
-        const brand = document.createElement('span'); brand.textContent = 'ODC Managed - PAM Internal Audit Tool';
+        const brand = document.createElement('span'); brand.textContent = 'PAM Internal Audit Tool';
         const pageNumber = document.createElement('span'); pageNumber.className = 'page-number'; pageNumber.textContent = 'Page ' + (pageIndex + 2) + ' of ' + total;
         footer.append(brand, pageNumber); page.append(header, grid, footer); $('appendixPages').append(page);
       }
-      const exportedArtefacts = images.slice(0, total * 2).filter(Boolean).length;
-      const excludedArtefacts = images.slice(total * 2).filter(Boolean).length;
+      const exportedArtefacts = images.slice(0, artefactTotal).filter(Boolean).length;
+      const excludedArtefacts = images.slice(artefactTotal).filter(Boolean).length;
       $('pageCount').textContent = total;
-      $('pageNavigation').replaceChildren();
-      document.querySelectorAll('#report .page').forEach((page, index) => {
-        const link = document.createElement('a'); link.href = '#' + page.id;
-        const label = document.createElement('span'); label.textContent = 'Page ' + (index + 1);
-        const count = document.createElement('small'); count.textContent = images.slice(index * 2, index * 2 + 2).filter(Boolean).length + ' / 2 artefacts';
-        link.append(label, count); $('pageNavigation').append(link);
-      });
       $('artefactCount').textContent = exportedArtefacts;
-      $('pageSummary').textContent = 'Two artefacts per page' + (excludedArtefacts ? ' · ' + excludedArtefacts + ' saved outside export' : '');
+      $('pageSummary').textContent = '';
       targetSlot = null;
       syncPrint();
     }
     function removeImage(index) {
       if (busy) return;
-      if (index < 2) images[index] = null; else images.splice(index, 1);
+      if (index < 2) images[index] = null; else images[index] = null;
       while (images.length > 2 && !images[images.length - 1]) images.pop();
       render(); save();
     }
@@ -574,10 +647,8 @@
           try {
             if (file.size > 25 * 1024 * 1024) { failed++; continue; }
             const record = await readImage(file);
-            let slot = index !== null ? index : images.slice(0, 2).indexOf(null);
-            if (slot < 0 && includeAppendix) { slot = images.findIndex((image, i) => i >= 2 && !image); if (slot < 0) slot = images.length; }
-            if (slot < 0 || (slot >= 2 && !includeAppendix)) { blockedMessage = 'Tick “Multiple artefacts (3+)” to enable page 2, then paste again.'; break; }
-            if (slot >= 2 + additionalPages * 2) { blockedMessage = 'All available spaces are filled. Select “Add page”, then paste your next screenshot.'; break; }
+            const slot = index !== null ? index : Array.from({ length: artefactTotal }, (_, i) => i).find(i => !images[i]);
+            if (slot === undefined || slot < 0 || slot >= artefactTotal) { blockedMessage = 'All selected artefact spaces are occupied.'; break; }
             while (images.length <= slot) images.push(null);
             images[slot] = record;
             lastSlot = slot;
@@ -586,9 +657,8 @@
         }
         render(); save();
         if (blockedMessage) setStatus(blockedMessage, true);
-        const next = lastSlot >= 2 ? images.findIndex((image, i) => i >= 2 && !image) : images.slice(0, 2).indexOf(null);
-        if (next >= 0) activate(next);
-        else if (includeAppendix) activate(images.length);
+        const next = Array.from({ length: artefactTotal }, (_, i) => i).find(i => !images[i]);
+        if (next !== undefined) activate(next);
         if (failed) setStatus(failed + ' file(s) skipped. Use supported images under 25 MB each. Other images were added; check the draft storage status before leaving.', true);
       } finally { busy = false; document.querySelectorAll('.controls button').forEach(button => button.disabled = false); }
     }
@@ -633,48 +703,61 @@
         const page = document.createElement('article'); page.className = 'page appendix remarks-continuation'; page.id = 'remarksPage' + (index + 1);
         const heading = document.createElement('h2'); heading.className = 'section-title'; heading.textContent = 'Audit remarks — continued';
         const content = document.createElement('div'); content.className = 'remarks-content'; content.textContent = chunk;
-        const footer = document.createElement('footer'); footer.innerHTML = '<span>ODC Managed - PAM Internal Audit Tool</span><span class="page-number"></span>';
+        const footer = document.createElement('footer'); footer.innerHTML = '<span>PAM Internal Audit Tool</span><span class="page-number"></span>';
         page.append(heading, content, footer); $('remarksPages').append(page);
       });
       const pages = [...document.querySelectorAll('#report .page')];
       pages.forEach((page, i) => page.querySelector('.page-number').textContent = 'Page ' + (i + 1) + ' of ' + pages.length);
       $('pageCount').textContent = pages.length;
+      const navigationSignature = pages.map(page => page.id + ':' + [...page.querySelectorAll('.image-area')].map(area => area.dataset.index + ':' + Boolean(images[Number(area.dataset.index)])).join(',') + ':' + Boolean(page.querySelector('.remarks-section'))).join('|');
+      if ($('pageNavigation').dataset.signature !== navigationSignature) {
+      $('pageNavigation').dataset.signature = navigationSignature;
       $('pageNavigation').replaceChildren();
       pages.forEach((page, i) => {
-        const link = document.createElement('a'); link.href = '#' + page.id; link.textContent = 'Page ' + (i + 1) + (page.classList.contains('remarks-continuation') ? ' · Remarks' : ''); $('pageNavigation').append(link);
+        const link = document.createElement('a'); link.href = '#' + page.id;
+        const label = document.createElement('span'); label.textContent = 'Page ' + (i + 1) + (page.classList.contains('remarks-continuation') ? ' · Remarks' : '');
+        link.append(label);
+        const areas = [...page.querySelectorAll('.image-area')];
+        if (areas.length) {
+          const count = document.createElement('small');
+          count.textContent = areas.filter(area => images[Number(area.dataset.index)]).length + ' / ' + areas.length + (areas.length === 1 ? ' artefact' : ' artefacts');
+          link.append(count);
+        }
+        const sections = document.createElement('span'); sections.className = 'page-nav-sections';
+        sections.textContent = [page.id === 'firstPage' ? 'Report details' : '', areas.length ? 'Artefacts ' + areas.map(area => Number(area.dataset.index) + 1).join(', ') : 'Audit remarks', page.querySelector('.remarks-section') ? 'Audit remarks' : ''].filter(Boolean).join(' · ');
+        link.append(sections);
+        link.addEventListener('click', () => markCurrentPage(page.id));
+        $('pageNavigation').append(link);
       });
+      }
+      updateCurrentPage();
       $('overflowWarning').hidden = true;
     }
+    function markCurrentPage(id) {
+      document.querySelectorAll('#pageNavigation > a').forEach(link => {
+        if (link.hash === '#' + id) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    }
+    function updateCurrentPage() {
+      const pages = [...document.querySelectorAll('#report .page')];
+      const readingLine = Math.min(innerHeight * .3, 220);
+      const current = pages.find(page => page.getBoundingClientRect().bottom > readingLine) || pages[pages.length - 1];
+      if (current) markCurrentPage(current.id);
+    }
+    let pageScrollPending = false;
+    window.addEventListener('scroll', () => {
+      if (pageScrollPending) return;
+      pageScrollPending = true;
+      requestAnimationFrame(() => { pageScrollPending = false; updateCurrentPage(); });
+    }, { passive: true });
+    window.addEventListener('resize', updateCurrentPage);
     function canExport() {
       syncPrint();
       if (busy) { setStatus('Please wait for the images to finish loading.', true); return false; }
       save(); return true;
     }
     function esc(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
-    function buildWord() {
-      const footer = (page, total) => '<p style="border-top:1px solid #ccd6e0;padding-top:8px;color:#586b7e;font-size:8pt">ODC Managed - PAM Internal Audit Tool <span style="float:right">Page ' + page + ' of ' + total + '</span></p>';
-      const imageHtml = (record, index) => {
-        const maxWidth = 746, maxHeight = 294;
-        const preview = document.querySelector('.image-area[data-index="' + index + '"] img');
-        const width = record && (record.width || (preview && preview.naturalWidth)) || maxWidth;
-        const height = record && (record.height || (preview && preview.naturalHeight)) || maxHeight;
-        const scale = Math.min(maxWidth / width, maxHeight / height, 1);
-        const w = Math.round(width * scale), h = Math.round(height * scale);
-        return '<table width="100%" style="border-collapse:collapse;margin:10px 0;page-break-inside:avoid"><tr><td align="center" height="' + maxHeight + '" style="border:1px solid #ccd6e0">' + (record ? '<img alt="PAM artefact ' + (index + 1) + '" src="' + esc(record.src) + '" width="' + w + '" height="' + h + '" style="width:' + w + 'px;height:' + h + 'px">' : '&nbsp;') + '</td></tr><tr><td style="border:1px solid #ccd6e0;padding:5px;font-size:9pt"><b>Artefact ' + (index + 1) + '</b></td></tr></table>';
-      };
-      syncPrint();
-      const remarksTable = text => '<h2 style="font-size:9pt;margin:6px 0">Audit remarks</h2><div style="white-space:pre-wrap;word-wrap:break-word;font:12px/1.45 Arial;border:1px solid #ccd6e0;padding:5px 8px">' + esc(text) + '</div>';
-      const count = includeAppendix ? additionalPages : 0;
-      const cell = (label, value) => '<td width="33%" style="border:1px solid #ccd6e0;padding:4px 8px"><b style="color:#586b7e;font-size:7pt">' + label + '</b><br>' + esc(value || 'Not specified') + '</td>';
-      let body = '<h1 style="margin:0;font-size:17pt">PAM Summary Report</h1><p style="margin:3px 0 6px;font-size:8pt">Privileged Access Management · Report date: ' + esc(formattedDate($('reportDate').value)) + '</p><table width="100%" style="border-collapse:collapse"><tr>' + cell('User', $('user').value) + cell('Account Username', $('username').value) + cell('Shift', $('shift').value) + '</tr><tr>' + cell('User IP', $('ip').value) + cell('Account Address', $('accountAddress').value) + '<td width="33%" style="border:1px solid #ccd6e0;padding:4px 8px">&nbsp;</td>' + '</tr></table><h2 style="margin:6px 0 0;font-size:9pt">PAM Artefacts</h2>' + imageHtml(images[0], 0) + imageHtml(images[1], 1) + (count ? '' : remarksTable(remarksChunks[0])) + footer(1, count + remarksChunks.length);
-      for (let p = 0; p < count; p++) {
-        body += '<div style="page-break-before:always"><h1>Additional PAM Artefacts</h1><p>PAM Summary Report · ' + esc(formattedDate($('reportDate').value)) + '</p>';
-        for (let row = 0; row < 2; row++) { const index = 2 + p * 2 + row; body += imageHtml(images[index], index); }
-        body += (p === count - 1 ? remarksTable(remarksChunks[0]) : '') + footer(p + 2, count + remarksChunks.length) + '</div>';
-      }
-      remarksChunks.slice(1).forEach((chunk, i) => { body += '<div style="page-break-before:always">' + remarksTable(chunk) + footer(count + 2 + i, count + remarksChunks.length) + '</div>'; });
-      return '<!DOCTYPE html><html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>PAM Summary Report</title><style>@page{size:8.5in 11in;margin:.48in .35in}body{font-family:Arial;color:#213346;font-size:10pt}h1{font-size:20pt;color:#18324f}h2{font-size:11pt;color:#18324f;border-bottom:1px solid #ccd6e0;padding-bottom:5px}td{font-family:Arial;font-size:10pt}</style></head><body>' + body + '</body></html>';
-    }
     function setNavigation(open) {
       document.body.classList.toggle('nav-open', open);
       $('menuButton').setAttribute('aria-expanded', String(open));
@@ -698,24 +781,34 @@
       if (event.key === 'Escape' && document.body.classList.contains('nav-open')) { setNavigation(false); $('menuButton').focus(); }
     });
     window.matchMedia('(min-width: 1181px)').addEventListener('change', () => setNavigation(false));
-    $('includeAppendix').addEventListener('change', () => { includeAppendix = $('includeAppendix').checked; render(); save(); });
+    $('artefactTotal').addEventListener('change', () => {
+      const value = Number($('artefactTotal').value);
+      if (!Number.isInteger(value) || value < 1 || value > 100) { $('artefactTotal').value = artefactTotal; return; }
+      if (busy) { $('artefactTotal').value = artefactTotal; return; }
+      artefactTotal = value; render(); save();
+    });
+    function stepArtefacts(delta) {
+      if (busy) return;
+      $('artefactTotal').value = Math.min(100, Math.max(1, artefactTotal + delta));
+      $('artefactTotal').dispatchEvent(new Event('change'));
+    }
+    $('decreaseArtefacts').addEventListener('click', () => stepArtefacts(-1));
+    $('increaseArtefacts').addEventListener('click', () => stepArtefacts(1));
+    document.addEventListener('click', event => { if (!$('artefactHelp').contains(event.target)) $('artefactHelp').open = false; });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && $('artefactHelp').open) { $('artefactHelp').open = false; $('artefactHelp').querySelector('summary').focus(); }
+    });
     $('reportDate').addEventListener('click', () => { try { $('reportDate').showPicker(); } catch (error) { /* Native input remains available on unsupported browsers. */ } });
-    $('addPageButton').addEventListener('click', () => { if (busy) return; additionalPages++; render(); save(); const page = $('appendixPages').lastElementChild; page.scrollIntoView({ behavior: 'smooth', block: 'start' }); page.querySelector('.image-area').focus({ preventScroll: true }); });
-    $('removePageButton').addEventListener('click', () => { if (busy || additionalPages <= 1) return; const start = 2 + (additionalPages - 1) * 2; if (images.slice(start).some(Boolean) && !confirm('Remove the last page and its attached images?')) return; images = images.slice(0, start); additionalPages--; render(); save(); });
     fieldIds.forEach(id => $(id).addEventListener('input', () => { syncPrint(); scheduleSave(); if (id === 'reportDate') document.querySelectorAll('.appendix .subtitle').forEach(p => p.textContent = 'Supporting material · ' + formattedDate($('reportDate').value)); }));
     $('clearButton').addEventListener('click', () => { if (confirm('Remove all attached images? Report details and remarks will be kept.')) { images = [null, null]; render(); save(); } });
-    $('newButton').addEventListener('click', () => { if (confirm('Start a new report? This will replace the current draft, including all images.')) { fieldIds.forEach(id => $(id).value = ''); $('reportDate').value = localDate(); $('shift').value = defaultShift(); images = [null, null]; includeAppendix = false; additionalPages = 1; render(); save(); } });
+    $('newButton').addEventListener('click', () => { if (confirm('Start a new report? This will replace the current draft, including all images.')) { fieldIds.forEach(id => $(id).value = ''); $('reportDate').value = localDate(); $('shift').value = defaultShift(); images = [null, null]; artefactTotal = 2; includeAppendix = false; additionalPages = 1; render(); save(); } });
     document.addEventListener('paste', event => { const files = [...(event.clipboardData ? event.clipboardData.items : [])].filter(item => item.type.startsWith('image/')).map(item => item.getAsFile()).filter(Boolean); if (files.length) { event.preventDefault(); addFiles(files, targetSlot); } });
     // Clipboard images only: block file drops without importing them.
     document.addEventListener('dragover', event => { if ([...(event.dataTransfer.types || [])].includes('Files')) event.preventDefault(); });
     document.addEventListener('drop', event => { if (event.dataTransfer.files.length) { event.preventDefault(); setStatus('Use Snipping Tool and Ctrl+V to paste screenshots. File uploads and drops are disabled.', true); } });
     document.addEventListener('click', event => { if (!event.target.closest('.image-area, .appendix, #addPageButton')) { targetSlot = null; document.querySelectorAll('.image-area.active').forEach(area => area.classList.remove('active')); } });
     $('printButton').addEventListener('click', () => { if (canExport()) window.print(); });
-    $('wordButton').addEventListener('click', () => {
-      if (!canExport()) return;
-      const url = URL.createObjectURL(new Blob(['\ufeff', buildWord()], { type: 'application/msword' }));
-      const link = document.createElement('a'); link.href = url; link.download = 'ODC_PAM_Report_' + ($('reportDate').value || localDate()) + '.doc'; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000);
-    });
+
     window.addEventListener('beforeprint', syncPrint);
     window.addEventListener('pagehide', save);
     load();
