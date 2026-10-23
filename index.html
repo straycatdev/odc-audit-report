@@ -464,7 +464,7 @@
     const $ = id => document.getElementById(id);
     const fieldIds = ['user', 'username', 'ip', 'accountAddress', 'reportDate', 'shift', 'remarks'];
     let images = [null, null];
-    let artefactTotal = 2;
+    let artefactTotal = 1;
     let includeAppendix = false;
     let additionalPages = 1;
     let targetSlot = null;
@@ -800,8 +800,36 @@
     });
     $('reportDate').addEventListener('click', () => { try { $('reportDate').showPicker(); } catch (error) { /* Native input remains available on unsupported browsers. */ } });
     fieldIds.forEach(id => $(id).addEventListener('input', () => { syncPrint(); scheduleSave(); if (id === 'reportDate') document.querySelectorAll('.appendix .subtitle').forEach(p => p.textContent = 'Supporting material · ' + formattedDate($('reportDate').value)); }));
-    $('clearButton').addEventListener('click', () => { if (confirm('Remove all attached images? Report details and remarks will be kept.')) { images = [null, null]; render(); save(); } });
-    $('newButton').addEventListener('click', () => { if (confirm('Start a new report? This will replace the current draft, including all images.')) { fieldIds.forEach(id => $(id).value = ''); $('reportDate').value = localDate(); $('shift').value = defaultShift(); images = [null, null]; artefactTotal = 2; includeAppendix = false; additionalPages = 1; render(); save(); } });
+    function clearImages() {
+      if (busy) return;
+      if (!confirm('Remove all attached images? Artefact count, report details and remarks will be kept.')) return;
+      images = [null, null];
+      render();
+      save();
+    }
+    function newReport() {
+      if (busy) { setStatus('Please wait for the images to finish loading before starting a new report.', true); return; }
+      if (!confirm('Start a new report? All images, report details and remarks will be cleared, and the artefact count will reset to 1.')) return;
+      clearTimeout(saveTimer);
+      fieldIds.forEach(id => $(id).value = '');
+      $('reportDate').value = localDate();
+      $('shift').value = defaultShift();
+      images = [null, null];
+      artefactTotal = 1;
+      includeAppendix = false;
+      additionalPages = 1;
+      targetSlot = null;
+      $('artefactHelp').open = false;
+      if ($('imagePreview').open) $('imagePreview').close();
+      $('previewImage').removeAttribute('src');
+      setNavigation(false);
+      render();
+      save();
+      $('firstPage').scrollIntoView({ behavior: 'instant', block: 'start' });
+      $('user').focus({ preventScroll: true });
+    }
+    $('clearButton').addEventListener('click', clearImages);
+    $('newButton').addEventListener('click', newReport);
     document.addEventListener('paste', event => { const files = [...(event.clipboardData ? event.clipboardData.items : [])].filter(item => item.type.startsWith('image/')).map(item => item.getAsFile()).filter(Boolean); if (files.length) { event.preventDefault(); addFiles(files, targetSlot); } });
     // Clipboard images only: block file drops without importing them.
     document.addEventListener('dragover', event => { if ([...(event.dataTransfer.types || [])].includes('Files')) event.preventDefault(); });
